@@ -97,11 +97,6 @@ body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px
 .ytcard img{width:132px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block}
 .ytcard b{display:block;font-size:15px;line-height:1.35}
 .ytcard span{display:block;margin-top:4px;color:var(--gold);font-size:13px;font-weight:700}
-.subbtn{display:block;padding:10px 8px;border-radius:10px;background:#ce201c;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:700}
-.subbtn b{font-weight:900}
-.follow{display:grid;grid-template-columns:1fr;gap:8px}
-.follow a{display:block;padding:9px 6px;border:1px solid var(--cyan-dim);border-radius:10px;text-align:center;color:var(--fg);text-decoration:none;font-size:13px;line-height:1.35}
-.follow a b{display:block;color:var(--cyan);font-size:14.5px}
 .rvs a{white-space:nowrap;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(244,196,92,.4)}
 .player .time{color:var(--o1);font-weight:700}
 .info{font-size:12.5px;color:#aad7e6;line-height:1.45}
@@ -212,6 +207,21 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 @keyframes shine{to{left:130%}}
 @keyframes flash{0%{background-color:rgba(255,255,255,.9)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 結果頁版面 C（2026-10-23 Willie 選）：成績圖滿寬＋影片卡＋底部固定分享列，拿掉 IG */
+.app:has(.end) .rail{display:none}
+.end .btn{letter-spacing:.04em}
+.ytrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:min(100%,420px)}
+.ytrow a{display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 6px;border-radius:999px;font-size:13.5px;font-weight:700;text-decoration:none;color:#fff}
+.ytrow .w{border:1px solid var(--gold);color:var(--gold);background:var(--panel)}
+.ytrow .r{background:#ce201c}
+.mini{display:flex;gap:6px;width:min(100%,420px)}
+.mini .btn{flex:1;padding:7px 6px;font-size:13px}
+.app:has(.end) .brand{display:none}
+.end .cardimg{flex:none;width:100%;height:auto;aspect-ratio:4/5}
+.dock{position:sticky;bottom:0;z-index:5;width:100%;display:grid;gap:6px;justify-items:center;padding:8px 0 4px;background:linear-gradient(180deg,rgba(1,4,13,0),#01040d 30%)}
+.dock .main{width:min(100%,420px);padding:11px 10px;font-size:15.5px;background:linear-gradient(135deg,#f9a03c,#e1306c 55%,#833ab4)}
+.ytcard{width:min(100%,420px)}
+.msg:empty{display:none}
 </style>
 </head>
 <body>
@@ -469,20 +479,13 @@ function end(){
   const full=`${text}\n${LINK}`;
   $("#stage").innerHTML=`<section class="end">
     <img id="card" class="cardimg" alt="成績圖：答對 ${score} 題，${money}，${T.n}">
-    <div class="share"><button class="btn main" id="sMain">分享成績圖　IG・FB・LINE</button></div>
-    <div class="end-row">
-      <a class="btn ghost" id="sTH" target="_blank" rel="noopener">Threads</a>
-      <button class="btn ghost" id="cp">複製文字</button>
-      <button class="btn ghost" id="again">再玩一次</button>
-    </div>
-    <div class="linkbox"><code id="lk"></code><button class="btn" id="cpl">複製連結</button></div>
-    <div class="msg" id="smsg"></div>
-    <div class="more">
-      <a class="ytcard" href="${YT_URL}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${YT_ID}/hqdefault.jpg" alt="" loading="lazy"><div><b>看完整版：外送員挑戰百萬大挑戰</b><span>▶ YouTube 觀看</span></div></a>
-      <a class="subbtn" href="${YT_CH}" target="_blank" rel="noopener">▶ 訂閱 YouTube 頻道 <b>Yes100 AI Visual Lab</b></a>
-      <div class="follow">
-        <a href="https://www.instagram.com/${IG_BRAND}/" target="_blank" rel="noopener"><b>IG @${IG_BRAND}</b>追蹤 Yes100・第二集上線通知</a>
-      </div>
+    <a class="ytcard" href="${YT_URL}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${YT_ID}/hqdefault.jpg" alt="" loading="lazy"><div><b>看完整版：外送員挑戰百萬大挑戰</b><span>▶ YouTube 觀看</span></div></a>
+    <div class="ytrow" style="grid-template-columns:1fr"><a class="r" href="${YT_CH}" target="_blank" rel="noopener">訂閱 YouTube 頻道 Yes100 AI Visual Lab</a></div>
+    <button class="btn ghost" id="cp" hidden>複製文字</button><code id="lk" hidden></code>
+    <div class="dock">
+      <button class="btn main" id="sMain">分享成績圖　IG・FB・LINE</button>
+      <div class="mini"><a class="btn ghost" id="sTH" target="_blank" rel="noopener">Threads</a><button class="btn ghost" id="cpl">複製連結</button><button class="btn ghost" id="again">再玩一次</button></div>
+      <div class="msg" id="smsg"></div>
     </div>
     <textarea id="stext" class="stext" readonly hidden></textarea>
   </section>`;
