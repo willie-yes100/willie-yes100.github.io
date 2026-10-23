@@ -91,6 +91,17 @@ body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px
 .board.rvd{flex:none}
 .board.rvd .opts{flex:none;grid-template-rows:auto;align-content:start}
 .board.rvd .loz .i{min-height:60px}
+.ytl{display:inline-block;margin:2px 0 6px;color:var(--gold);font-size:13.5px;text-decoration:none;border-bottom:1px solid rgba(244,196,92,.4)}
+.more{margin-top:14px;display:grid;gap:10px}
+.ytcard{display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px;align-items:center;padding:8px;border:1px solid var(--gold);border-radius:12px;background:var(--panel);color:var(--fg);text-decoration:none}
+.ytcard img{width:132px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block}
+.ytcard b{display:block;font-size:15px;line-height:1.35}
+.ytcard span{display:block;margin-top:4px;color:var(--gold);font-size:13px;font-weight:700}
+.subbtn{display:block;padding:10px 8px;border-radius:10px;background:#ce201c;color:#fff;text-align:center;text-decoration:none;font-size:14px;font-weight:700}
+.subbtn b{font-weight:900}
+.follow{display:grid;grid-template-columns:1fr;gap:8px}
+.follow a{display:block;padding:9px 6px;border:1px solid var(--cyan-dim);border-radius:10px;text-align:center;color:var(--fg);text-decoration:none;font-size:13px;line-height:1.35}
+.follow a b{display:block;color:var(--cyan);font-size:14.5px}
 .rvs a{white-space:nowrap;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(244,196,92,.4)}
 .player .time{color:var(--o1);font-weight:700}
 .info{font-size:12.5px;color:#aad7e6;line-height:1.45}
@@ -218,6 +229,10 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* 上線後把這行換成正式網址 */
+const YT_ID="xtw3WsbC9IU", YT_URL="https://youtu.be/"+YT_ID, YT_T=[10,48,91,158];  /* 影片 v23j 各題開題秒數（cards23e.json） */
+const IG_BRAND="yes100.aa";
+const YT_CH="https://www.youtube.com/@yes100.ai_visual_lab?sub_confirmation=1";  /* 帶 sub_confirmation 會直接跳訂閱確認 */
+const ytAt=i=>`${YT_URL}?t=${YT_T[i]}`, mmss=t=>`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`;
 const SHARE_URL="https://willie-yes100.github.io/quiz/ep1/";
 /* 最後一題答案揭曉：影片說三天後公布，Willie 說可以公布再改成 true */
 const Q4_REVEAL=false, Q4_DATE="10/25";
@@ -376,6 +391,7 @@ function doReveal(timeout){
   $(".lifes").hidden=true;
   $("#msg").innerHTML=`<div class="reveal">
      <div class="rv-top">${ok?`<span class="tag">答對了</span><span class="money">${MONEY[score-1]}</span>`:`<span class="tag bad">${timeout?"時間到":"答錯了"}・挑戰結束</span>`}</div>
+     <a class="ytl" href="${ytAt(r)}" target="_blank" rel="noopener">▶ 看影片裡外送員怎麼答這題（${mmss(YT_T[r])}）</a>
      <button class="btn" id="next">${(!ok||last)?"看結果":"下一題"}</button></div>`;
   $("#next").onclick=()=>{ r= over?N:r+1; render(); window.scrollTo({top:0,behavior:"smooth"}); };
   rail();
@@ -387,7 +403,7 @@ function lockFinal(){
   document.querySelectorAll(".loz").forEach(b=>{ if(+b.dataset.i!==pick) b.classList.add("dim"); });
   $("#msg").innerHTML=`<div class="reveal">
      <div class="rv-top"><span class="tag" style="color:var(--o1)">答案鎖定 ${"ABCD"[pick]}</span></div>
-     <div class="meta">最後一題的答案 ${Q4_DATE} 公布，先到影片留言區留下你的答案</div>
+     <div class="meta">最後一題的答案 ${Q4_DATE} 公布，先到 <a class="ytl" href="${ytAt(r)}" target="_blank" rel="noopener">YouTube 影片</a> 留言區留下你的答案</div>
      <button class="btn" id="next">看結果</button></div>`;
   $("#next").onclick=()=>{ r=N; render(); window.scrollTo({top:0,behavior:"smooth"}); };
 }
@@ -448,7 +464,7 @@ function drawCard(cv,qr){
   g.textAlign="left"; const lx=W*.08;
   g.font=`700 ${W*.04}px ${sans}`; g.fillStyle="#f4c45c"; g.fillText("#問A答B大挑戰",lx,Y(1185));
   g.font=`500 ${W*.03}px ${sans}`; g.fillStyle="#f6f8fc"; g.fillText("掃 QR code 挑戰，看你能拿幾萬",lx,Y(1240));
-  g.font=`600 ${W*.026}px ${num}`; g.fillStyle="#8fa6bf"; g.fillText(`${ds}　YES100 AI VISUAL LAB`,lx,Y(1290)); g.textAlign="center";
+  g.font=`600 ${W*.026}px ${num}`; g.fillStyle="#8fa6bf"; g.fillText(`${ds}　YES100 AI VISUAL LAB　IG @${IG_BRAND}`,lx,Y(1290)); g.textAlign="center";
 }
 function end(){
   audio.pause(); stopTimer(); rail();
@@ -467,6 +483,13 @@ function end(){
     </div>
     <div class="linkbox"><code id="lk"></code><button class="btn" id="cpl">複製連結</button></div>
     <div class="msg" id="smsg"></div>
+    <div class="more">
+      <a class="ytcard" href="${YT_URL}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${YT_ID}/hqdefault.jpg" alt="" loading="lazy"><div><b>看完整版：外送員挑戰百萬大挑戰</b><span>▶ YouTube 觀看</span></div></a>
+      <a class="subbtn" href="${YT_CH}" target="_blank" rel="noopener">▶ 訂閱 YouTube 頻道 <b>Yes100 AI Visual Lab</b></a>
+      <div class="follow">
+        <a href="https://www.instagram.com/${IG_BRAND}/" target="_blank" rel="noopener"><b>IG @${IG_BRAND}</b>追蹤 Yes100・第二集上線通知</a>
+      </div>
+    </div>
     <textarea id="stext" class="stext" readonly hidden></textarea>
   </section>`;
   $("#lk").textContent=LINK;
