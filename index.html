@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YES100 SERIES</title>
+<meta name="description" content="Yes100 AI VISUAL LAB 的公開作品與互動節目。">
+<meta property="og:title" content="YES100 SERIES">
+<meta property="og:description" content="Yes100 AI VISUAL LAB 的公開作品與互動節目。">
+<meta property="og:url" content="https://willie-yes100.github.io/">
+<meta property="og:image" content="https://willie-yes100.github.io/quiz/ep1/og.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter+Tight:wght@700&family=Roboto+Condensed:wght@400&display=swap">
+<style>
+/* Yes100 公開總站：作品入口。每個作品一張卡，新作品加在 WORKS 最前面 */
+:root{
+  --bg:#01040d; --fg:#f2eee6; --muted:#8fa6bf; --cyan:#50e6ff; --red:#ce201c; --gold:#f4c45c;
+  --panel:rgba(6,16,38,.85); --line:rgba(80,230,255,.28);
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.6;
+  background-image:radial-gradient(70% 40% at 50% 0%,rgba(80,200,255,.16),transparent 70%)}
+.wrap{max-width:960px;margin:0 auto;padding:28px 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{border-left:4px solid var(--red);padding-left:10px;font-size:22px;line-height:1.1;letter-spacing:.03em;font-family:"Roboto Condensed",sans-serif}
+.mark b{font-family:"Inter Tight",sans-serif;font-weight:700;letter-spacing:0}
+.lab{font-size:12px;color:var(--muted);letter-spacing:.08em}
+h1{font-size:15px;font-weight:500;color:var(--muted);margin:22px 0 16px;letter-spacing:.12em}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.card .t{padding:12px 14px 14px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:#01040d;background:var(--gold);border-radius:4px;padding:1px 7px;margin-right:6px}
+.tag.soon{background:transparent;color:var(--muted);border:1px solid var(--muted)}
+.card h2{margin:6px 0 2px;font-size:19px;font-weight:900}
+.card p{margin:0;font-size:13.5px;color:#c7d6e6}
+.card.off{pointer-events:none;opacity:.55}
+.ph{aspect-ratio:16/9;display:grid;place-items:center;background:linear-gradient(135deg,#071530,#02060f);font-weight:900;font-size:26px;color:rgba(242,238,230,.35);letter-spacing:.2em}
+footer{margin-top:32px;font-size:11.5px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark"><b>YES100</b> SERIES</div>
+    <div class="lab">Yes100 AI VISUAL LAB</div>
+  </header>
+  <h1>公開作品・互動節目</h1>
+  <main class="grid" id="works"></main>
+  <footer>新聞原音僅供評論・影音創作 Yes100 AI VISUAL LAB</footer>
+</div>
+<script>
+const WORKS=[
+  {href:"quiz/ep1/",img:"quiz/ep1/cover.jpg",tag:"互動版",title:"問A答B 大挑戰｜第一集",desc:"只聽市長的回答，猜記者原本問了什麼。四題闖關，全對拿一百萬。"},
+  {href:"",img:"",tag:"即將推出",soon:true,title:"問A答B 大挑戰｜第二集",desc:"六段新原音，題目準備中。"}
+];
+const esc=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+document.getElementById("works").innerHTML=WORKS.map(w=>`
+  <a class="card${w.soon?" off":""}" ${w.href?`href="${w.href}"`:'aria-disabled="true"'}>
+    ${w.img?`<img src="${w.img}" alt="${esc(w.title)}" loading="lazy">`:`<div class="ph">COMING SOON</div>`}
+    <div class="t"><span class="tag${w.soon?" soon":""}">${esc(w.tag)}</span><h2>${esc(w.title)}</h2><p>${esc(w.desc)}</p></div>
+  </a>`).join("");
+</script>
+</body>
+</html>

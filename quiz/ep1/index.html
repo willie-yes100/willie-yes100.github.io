@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>問A答B大挑戰</title>
+<meta property="og:url" content="https://willie-yes100.github.io/quiz/ep1/">
+<meta property="og:image" content="https://willie-yes100.github.io/quiz/ep1/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:title" content="問A答B大挑戰">
+<meta property="og:description" content="先聽市長的回答，猜記者到底問了什麼。四題闖關，獎金一百萬。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Barlow+Condensed:wght@600;700&family=Inter+Tight:wght@700&family=Roboto+Condensed:wght@400&display=swap">
+<style>
+/* 2026-10-23 web_v3：題目、選項、原音與影片 v23j 相同（四題）；最後一題照影片先不揭曉，Q4_REVEAL 改 true 才公布。一個畫面玩完：單行片名、小獎金列、橫向播放列、題目＋四選項，揭曉時收起其他選項；字卡樣式照節目（gfx_v3.py） */
+:root{
+  --bg:#01040d; --cyan:#50e6ff; --cyan-dim:rgba(80,230,255,.35);
+  --n1:rgba(8,22,48,.94); --n2:rgba(2,8,22,.94);
+  --o1:#faa028; --o2:#be5a00; --g1:#46d778; --g2:#0a7837; --r1:#e0503c; --r2:#821810;
+  --gold:#f4c45c; --fg:#f6f8fc; --muted:#8fa6bf; --panel:rgba(4,14,36,.9);
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --num:"Barlow Condensed","Arial Narrow",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;overflow-x:hidden;
+  background-image:radial-gradient(60% 30% at 50% 0%,rgba(80,200,255,.2),transparent 70%),radial-gradient(90% 40% at 50% 100%,rgba(20,60,120,.3),transparent 70%)}
+.app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:10px 8px;display:flex;flex-direction:column;gap:10px;height:100vh;height:100dvh}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+/* YES100 SERIES 角標與開場系列卡（照影片 corner.png／series.png：紅條、Inter Tight＋Roboto Condensed） */
+.corner{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#f2eee6;line-height:1;margin-bottom:-4px}
+.corner .ep{border-left:3px solid #ce201c;padding-left:7px;font-weight:700;letter-spacing:.05em}
+.corner .ys{font-family:"Roboto Condensed",sans-serif;letter-spacing:.04em}
+.corner .ys b{font-family:"Inter Tight",sans-serif;font-weight:700;letter-spacing:0}
+.series{position:fixed;inset:0;z-index:30;background:#01040d;color:#f2eee6;cursor:pointer;overflow:hidden;animation:sout .5s 5.2s ease-in forwards;
+  background-image:radial-gradient(60% 35% at 50% 40%,rgba(80,200,255,.18),transparent 70%)}
+.series>div{position:absolute;inset:0;display:grid;place-content:center;gap:10px;text-align:center}
+.st1{opacity:0;animation:s1 2.6s ease-in-out forwards}
+.st2{opacity:0;animation:s2 .6s 2.7s ease-out forwards}
+.st2::after{content:"";position:absolute;top:-20%;bottom:-20%;width:30%;left:-50%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transform:skewX(-20deg);animation:shine 1.1s 3.1s ease-in-out forwards}
+.st2 .w1{font:900 64px var(--sans);letter-spacing:.03em;line-height:1;background:linear-gradient(180deg,#fff 0%,#dfe8f2 45%,#96afc8 55%,#eef3f8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(80,230,255,.55))}
+.st2 .w2{font:900 32px var(--sans);letter-spacing:.35em;margin-left:.35em;background:linear-gradient(180deg,#ffeeb0,#be7a1e 60%,#ffe08c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.st2 .ln{display:block;width:220px;height:3px;margin:4px auto 0;background:#50e6ff;box-shadow:0 0 10px #50e6ff}
+.st2 .w3{font-size:15px;letter-spacing:.3em;color:#aad7e6}
+@keyframes s1{0%{opacity:0}25%,80%{opacity:1}100%{opacity:0}}
+@keyframes s2{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:none}}
+@keyframes sout{to{opacity:0;visibility:hidden}}
+.series .a{font:400 30px "Roboto Condensed",sans-serif;letter-spacing:.04em}
+.series .b{font:700 25px "Inter Tight","Noto Sans TC",sans-serif}
+.series .b span{font-family:"Noto Sans TC",sans-serif;margin-left:8px}
+.brand{display:flex;align-items:baseline;justify-content:center;gap:10px;line-height:1}
+.brand .t1{font-weight:900;font-size:28px;letter-spacing:.03em;background:linear-gradient(180deg,#fff 0%,#dfe8f2 45%,#96afc8 55%,#eef3f8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(80,230,255,.45))}
+.brand .gw{background:linear-gradient(180deg,#ffeeb0,#be7a1e 60%,#ffe08c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .t2{font-weight:900;font-size:17px;letter-spacing:.3em;background:linear-gradient(180deg,#ffeeb0,#be7a1e 60%,#ffe08c);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* 六角框 */
+.hx{position:relative;--c:16px;filter:drop-shadow(0 0 3px rgba(80,230,255,.85)) drop-shadow(0 0 8px rgba(80,230,255,.3))}
+.hx>.o{background:var(--cyan);padding:2px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% 50%,calc(100% - var(--c)) 100%,var(--c) 100%,0 50%)}
+.hx>.o>.i{clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% 50%,calc(100% - var(--c)) 100%,var(--c) 100%,0 50%);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--n1),var(--n2));
+  display:flex;align-items:center;gap:8px;min-height:44px;padding:6px calc(var(--c) + 8px);transition:background .25s}
+.row{position:relative;isolation:isolate}
+.row>.hx{z-index:1}
+.row::before{content:"";position:absolute;z-index:0;left:-16px;right:-16px;top:50%;height:2px;margin-top:-1px;background:var(--cyan);box-shadow:0 0 6px var(--cyan);opacity:.7}
+/* 獎金列 */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rail .hx{--c:9px}
+.rail .i{justify-content:center;white-space:nowrap;min-height:30px!important;padding:2px 4px!important;font-family:var(--num);font-weight:700;font-size:14px;color:var(--muted)}
+.rail .done .i{color:var(--gold)}
+.rail .now .i{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--o1),var(--o2));color:#fff}
+.rail .out .i{background:linear-gradient(180deg,var(--r1),var(--r2));color:#fff}
+/* 播放列 */
+.player{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;padding:6px 12px;border:1px solid var(--cyan-dim);border-radius:12px;background:var(--panel)}
+.disc{position:relative;width:68px;height:68px;border:0;background:none;padding:0;cursor:pointer;color:#fff;border-radius:50%}
+.disc.fresh{animation:beckon 1.3s ease-in-out infinite}
+@keyframes beckon{0%,100%{box-shadow:0 0 0 0 rgba(250,160,40,.7)}50%{box-shadow:0 0 0 12px rgba(250,160,40,0)}}
+.disc[disabled]{cursor:default;opacity:.45}
+.disc svg{position:absolute;inset:0;transform:rotate(-90deg);filter:drop-shadow(0 0 6px rgba(250,160,40,.7))}
+.disc .ico{position:absolute;inset:0;display:grid;place-items:center;font-size:26px;padding-left:3px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.player .info b{font-size:16px}
+.player.rv{border-color:var(--gold);box-shadow:0 0 12px rgba(244,196,92,.25)}
+.player.rv .info b{color:var(--gold);font-size:14.5px}
+.rvq{margin-top:4px;font-size:15px;line-height:1.45;color:var(--fg);font-weight:700}
+.rvq span{display:block;font-size:11.5px;font-weight:500;color:var(--muted);letter-spacing:.1em}
+.rvs{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.6}
+.board.rvd{flex:none}
+.board.rvd .opts{flex:none;grid-template-rows:auto;align-content:start}
+.board.rvd .loz .i{min-height:60px}
+.rvs a{white-space:nowrap;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(244,196,92,.4)}
+.player .time{color:var(--o1);font-weight:700}
+.info{font-size:12.5px;color:#aad7e6;line-height:1.45}
+.info b{color:var(--fg);font-weight:700;font-size:14px;display:block}
+.time{font-family:var(--num);font-size:14px;color:var(--muted);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+/* 題目與選項 */
+.board{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.q{flex:none}
+.q::before{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.q .hx{filter:drop-shadow(0 0 3px rgba(244,196,92,.9)) drop-shadow(0 0 10px rgba(244,196,92,.35))}
+.q .hx>.o{background:var(--gold)}
+.q .hx>.o>.i{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 50%),linear-gradient(180deg,#4a2a06,#1e0f02);color:#fff3d6}
+.q .i{justify-content:center;text-align:center;font-weight:700;font-size:16px;min-height:52px!important;line-height:1.4}
+.opts{flex:1;min-height:0;display:grid;grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(58px,88px));align-content:center;gap:10px}
+.loz,.loz>.hx,.loz>.hx>.o,.loz>.hx>.o>.i{height:100%}
+.loz{all:unset;display:block;cursor:pointer;min-width:0}
+.loz .i{font-size:16.5px;line-height:1.4;color:#e1ebf5}
+.loz .k{flex:none;color:var(--gold);font-weight:700;font-size:18px;white-space:nowrap}
+.loz .k::before{content:"◆";font-size:10px;margin-right:5px;position:relative;top:-1px}
+.loz:hover .i{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 50%),linear-gradient(180deg,rgba(16,40,82,.96),rgba(4,14,36,.96))}
+.loz.sel .i{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--o1),var(--o2));color:#fff}
+.loz.ok .i{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--g1),var(--g2));color:#fff}
+.loz.bad .i{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--r1),var(--r2));color:#fff}
+.loz.sel .k,.loz.ok .k,.loz.bad .k{color:#fff}
+.loz.gone{visibility:hidden}
+.loz.dim{display:none}
+.loz.ok{animation:pulse .45s 3}
+@keyframes pulse{50%{filter:brightness(1.35)}}
+/* 錦囊列 */
+.foot{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.lifes{display:flex;gap:8px}
+.life{width:74px;height:44px;border-radius:50%;border:2px solid var(--cyan);background:var(--panel);color:var(--fg);font:700 13.5px var(--sans);cursor:pointer;box-shadow:0 0 6px var(--cyan-dim)}
+.life[disabled]{opacity:.25;cursor:default;box-shadow:none}
+.btn{border:0;border-radius:999px;padding:11px 26px;font:700 16px var(--sans);letter-spacing:.1em;cursor:pointer;color:#fff;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 50%),linear-gradient(180deg,var(--o1),var(--o2));box-shadow:0 0 10px rgba(250,160,40,.35)}
+.btn.ghost{background:var(--panel);border:2px solid var(--cyan);box-shadow:0 0 6px var(--cyan-dim);padding:7px 14px;font-size:13px;letter-spacing:.04em}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn:focus-visible,.loz:focus-visible,.life:focus-visible,.disc:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.msg{flex:none;font-size:14px;color:#c7d6e6;text-align:center}
+.msg:empty{display:none}
+/* 揭曉 */
+.reveal{display:grid;gap:6px;justify-items:center;text-align:center}
+.rv-top{display:flex;align-items:center;gap:12px}
+.tag{font-weight:900;font-size:16px;letter-spacing:.2em;color:var(--g1)}
+.tag.bad{color:var(--r1)}
+.money{font-family:var(--num);font-weight:700;font-size:28px;letter-spacing:.03em;background:linear-gradient(180deg,#fff2c0,#e1a03c 55%,#ffe39a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.meta{font-size:13.5px;color:var(--muted)}
+.meta a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(244,196,92,.4)}
+/* 開場 */
+.cover{display:block;width:100%;max-height:34vh;object-fit:cover;border-radius:10px;border:1px solid var(--cyan-dim);box-shadow:0 0 16px rgba(80,230,255,.25)}
+.start{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;text-align:center}
+.challenge{width:100%}
+.challenge .i{justify-content:center;text-align:center;font-weight:700;font-size:15px;line-height:1.5;padding:8px 30px!important}
+.challenge b{font-family:var(--num);font-size:19px}.challenge .gold{color:var(--gold)}
+.lead{margin:0;font-size:16px;color:#c7d6e6;line-height:1.7}
+.nmlab{font-size:12px;color:var(--muted)}
+.nm{width:min(100%,320px);padding:13px 16px;border-radius:999px;border:2px solid var(--cyan);background:var(--panel);color:var(--fg);font:500 16px var(--sans);text-align:center;box-shadow:0 0 6px var(--cyan-dim)}
+.nm:focus{outline:2px solid var(--gold);outline-offset:3px}
+.btn.big{font-size:18px;padding:14px 44px}
+/* 結算 */
+.end{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.cardimg{display:block;flex:1;min-height:0;width:100%;object-fit:contain;border-radius:6px;box-shadow:0 0 18px rgba(80,230,255,.25)}
+.share{flex:none;display:grid;gap:8px;width:min(100%,420px)}
+.share .main{width:100%;padding:14px 10px;font-size:17px;letter-spacing:.04em;background:linear-gradient(135deg,#f9a03c,#e1306c 55%,#833ab4)}
+.end-row .btn{flex:1}
+.linkbox{flex:none;width:min(100%,420px);display:flex;gap:8px;align-items:center;padding:6px 6px 6px 12px;border:1px solid var(--cyan-dim);border-radius:999px;background:var(--panel)}
+.linkbox code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12.5px var(--num);color:#aad7e6;text-align:left}
+.linkbox .btn{padding:7px 14px;font-size:13.5px;flex:none}
+.ig{background:linear-gradient(135deg,#f9a03c,#e1306c 50%,#833ab4)!important}
+.th{background:#111!important;border:2px solid #fff!important}
+.fb{background:#1877f2!important}
+.end-row{flex:none;display:flex;gap:8px;width:min(100%,420px)}
+.stext{width:min(100%,380px);height:90px;background:var(--panel);color:var(--fg);border:2px solid var(--cyan);border-radius:8px;padding:8px;font:13px var(--sans)}
+.credit{flex:none;position:relative;z-index:1;font-size:10.5px;color:var(--muted);text-align:center;opacity:.8}
+/* 舞台：兩道掃動的追光＋地板光暈（節目 S01 棚的冷藍） */
+.app{position:relative;z-index:1}
+.beams{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.beams i{position:absolute;top:-10%;width:60vmax;height:120vh;left:50%;margin-left:-30vmax;transform-origin:50% 0;
+  background:linear-gradient(180deg,rgba(150,225,255,.16),rgba(150,225,255,0) 75%);clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);filter:blur(6px);animation:sweep 9s ease-in-out infinite alternate}
+.beams i:nth-child(2){animation-duration:11s;animation-direction:alternate-reverse;opacity:.8}
+.beams b{position:absolute;left:50%;bottom:-18vh;width:140vw;height:40vh;margin-left:-70vw;border-radius:50%;background:radial-gradient(closest-side,rgba(60,170,255,.28),rgba(60,170,255,0))}
+@keyframes sweep{from{transform:rotate(-28deg)}to{transform:rotate(28deg)}}
+/* 倒數圈（照節目：20 秒、剩 5 秒變紅、鎖定停住） */
+.player{grid-template-columns:auto minmax(0,1fr) auto!important}
+.timer{position:relative;width:62px;height:62px}
+.timer svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.timer .n{position:absolute;inset:0;display:grid;place-items:center;font:700 28px var(--num);color:var(--fg);font-variant-numeric:tabular-nums}
+.timer .s{position:absolute;left:0;right:0;bottom:-15px;text-align:center;font-size:10px;color:var(--muted);white-space:nowrap}
+.timer.idle .n{color:var(--muted)}
+.timer.red .n{color:#ff5a46;animation:beat 1s ease-out infinite}
+.timer.red #tring{stroke:#ff5a46}
+@keyframes beat{0%{transform:scale(1.25)}40%{transform:scale(1)}}
+/* 鎖定後的懸念：選項橘色閃 */
+.loz.sus .i{animation:sus .4s steps(2) infinite}
+@keyframes sus{50%{filter:brightness(1.6)}}
+/* 全螢幕字卡：題號進場、答對、答錯 */
+.ov{position:fixed;inset:0;z-index:20;pointer-events:none;display:grid;place-items:center;align-content:center;gap:10px;text-align:center;background:rgba(1,4,13,.94);overflow:hidden;animation:ovin .25s ease-out}
+.ov::after{content:"";position:absolute;top:-50%;bottom:-50%;width:35%;left:-60%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:shine 1s .1s ease-in-out}
+.ov .k1{font:900 44px var(--sans);letter-spacing:.12em;background:linear-gradient(180deg,#fff 0%,#dfe8f2 45%,#96afc8 55%,#eef3f8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px rgba(80,230,255,.6))}
+.ov .k2{font:700 40px var(--num);letter-spacing:.04em;background:linear-gradient(180deg,#fff2c0,#e1a03c 55%,#ffe39a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ov .k3{font-size:14px;color:#aad7e6;letter-spacing:.2em}
+.ov.ok{background:radial-gradient(circle,rgba(70,215,120,.35),rgba(1,4,13,.88) 70%)}
+.ov.ok .k1{background:none;color:#8ff0b0;-webkit-text-fill-color:#8ff0b0}
+.ov.bad{background:radial-gradient(circle,rgba(224,80,60,.4),rgba(1,4,13,.9) 70%)}
+.ov.bad .k1{background:none;color:#ff8a78;-webkit-text-fill-color:#ff8a78}
+.ov.flash{animation:flash .5s ease-out}
+@keyframes ovin{from{opacity:0;transform:scale(1.06)}}
+@keyframes shine{to{left:130%}}
+@keyframes flash{0%{background-color:rgba(255,255,255,.9)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="corner"><span class="ep">第一集</span><span class="ys"><b>YES100</b> SERIES</span></div>
+  <header class="brand"><span class="t1">問A答B</span><span class="t2">大挑戰</span></header>
+  <nav class="rail" id="rail" aria-label="獎金階梯"></nav>
+  <main id="stage"></main>
+  <div class="credit">新聞原音僅供評論・影音創作 Yes100 AI VISUAL LAB</div>
+<div class="beams" aria-hidden="true"><i></i><i></i><b></b></div>
+<div class="ov" id="ov" hidden></div>
+<div class="series" id="series" aria-hidden="true"><div class="st1"><div class="a">YES100 SERIES</div><div class="b">YES100<span>影集</span></div></div><div class="st2"><div class="w1">問A答B</div><div class="w2">大挑戰</div><i class="ln"></i><div class="w3">聽回答　猜問題</div></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* 上線後把這行換成正式網址 */
+const SHARE_URL="https://willie-yes100.github.io/quiz/ep1/";
+/* 最後一題答案揭曉：影片說三天後公布，Willie 說可以公布再改成 true */
+const Q4_REVEAL=false, Q4_DATE="10/25";
+/* 第一版＝影片四題 */
+const PRIZES=["1萬","20萬","40萬","100萬"];
+const MONEY=["NT$ 10,000","NT$ 200,000","NT$ 400,000","NT$ 1,000,000"];
+const NO=["第一題","第二題","第三題","最後一題"];
+const ROUNDS=[
+ {date:"2026.09.23",who:"台北市長記者聯訪",asker:"記者",a:"audio/q1_answer.mp3",q:"audio/q1_question.mp3",
+  opts:["選戰倒數，任內最滿意的前三大政績是？","金峰滷肉飯被出征，今天午餐會去吃嗎？","九把刀：您跟沈伯洋選一位做分組報告？","大巨蛋辦12強與奧運資格賽，交通好了嗎？"],
+  ans:2,full:"作家九把刀發文：從您跟沈伯洋中選一位一起完成分組報告，您覺得自己是哪一位？",
+  crowd:"三立新聞標題：「蔣萬安又當講稿機開始『背政績』？」",time:"作家九把刀在臉書用「分組報告」比喻這場市長選舉。",
+  src:[["三立原音重現（2:40 起）","https://youtu.be/yfEoha2Ej8Q?t=160"],["民視新聞","https://youtu.be/063wsMiWzIU"]]},
+ {date:"2026.10.16",who:"中廣《千秋萬事》專訪",asker:"主持人",a:"audio/q2_answer.mp3",q:"audio/q2_question.mp3",
+  opts:["選戰對手怎麼攻擊您？您承受了什麼？","都說您只會講大巨蛋，還有其他政績嗎？","蔡康永、趙少康遭政治攻擊，您的感受？","如果連任，交通建設下一步要做什麼？"],
+  ans:2,full:"蔡康永、趙少康遭政治攻擊，您對這個現象的感受是什麼？",
+  crowd:"網友：「他連題目都沒聽懂。」",time:"問題的主角不是他本人。",
+  src:[["中廣千秋萬事原片（54:05 起）","https://youtu.be/Mt86jSlhZoQ?t=3245"],["三立報導","https://setn.com/news/1923494"]]},
+ {date:"2026.10.11",who:"台北市長記者聯訪",asker:"記者",a:"audio/q3_answer.mp3",q:"audio/q3_question.mp3",
+  opts:["沈伯洋說您的政績很多是前朝留下的？","大巨蛋延宕啟用，您認為誰該負責？","選戰倒數，最想讓市民記得哪些建設？","減害還是發毒？沈伯洋批死貓戰術？"],
+  ans:3,full:"沈伯洋陣營強調減害，市府的理解還是發毒？沈伯洋批這是死貓戰術？",
+  crowd:"網友：「這已經是問A答ㄅㄆㄇ。」",time:"前一天，對手批評這是「死貓戰術」。",
+  src:[["三立原音重現","https://youtu.be/WDwtKLBZgiU"],["民視新聞","https://youtu.be/8SvzqTlWXv4"]]},
+ {date:"2026.10.08",who:"中天《綠也掀桌》專訪",asker:"主持人",a:"audio/q4_answer.mp3",q:null,
+  opts:["有人說您主張毒品進校園，這些標籤怎麼澄清？","營養午餐有學生身體不適，檢驗結果出來了嗎？","議員質疑午餐把關有漏洞，您敢保證全部合格嗎？","沈伯洋說您有問避答，您怎麼回應？"],
+  ans:-1,full:"",crowd:"",time:"",src:[]}
+];
+const N=ROUNDS.length;
+const isPending=i=>i===N-1&&!Q4_REVEAL;
+let finalPick=null;
+const TITLES=[
+ {n:"市長是誰？",d:"你跟市長還不熟，他講什麼你都信。"},
+ {n:"新聞看一半",d:"聽過大巨蛋，但還沒發現他每題都在講。"},
+ {n:"跑線老記者",d:"他一開口講輝達，你就知道問題被跳過了。"},
+ {n:"市府幕僚",d:"你比他更清楚他的講稿寫了什麼。"},
+ {n:"講稿本人",d:"恭喜，你就是那份講稿。"}];
+const C=2*Math.PI*25, TC=2*Math.PI*26, TLIM=20;
+let AC=null;
+const ac=()=>{ try{ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); }catch(e){} return AC; };
+function tone(f,t0,d,v,type="sine",f2){ const a=ac(); if(!a)return; const o=a.createOscillator(),g=a.createGain(); o.type=type; o.frequency.setValueAtTime(f,a.currentTime+t0);
+  if(f2) o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+t0+d); g.gain.setValueAtTime(0,a.currentTime+t0); g.gain.linearRampToValueAtTime(v,a.currentTime+t0+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+t0+d); o.connect(g).connect(a.destination); o.start(a.currentTime+t0); o.stop(a.currentTime+t0+d+.02); }
+const SFX={
+  tick:red=>tone(red?1500:1100,0,.05,red?.16:.07,"square"),
+  whoosh:()=>{ tone(180,0,.7,.22,"sine",55); tone(90,0,.9,.18,"triangle",40); },
+  lock:()=>{ tone(110,0,.6,.3,"sine",70); tone(220,0,.25,.08,"triangle"); },
+  ok:()=>{ tone(70,0,.5,.35,"sine",45); [523,659,784,1047].forEach((f,i)=>tone(f,.05+i*.07,.6,.09,"triangle")); },
+  bad:()=>{ tone(160,0,.9,.22,"sawtooth",60); tone(120,.15,.9,.18,"sawtooth",50); }
+};
+function overlay(cls,html,ms){ const o=$("#ov"); o.className="ov "+cls; o.innerHTML=html; o.hidden=false; clearTimeout(overlay.t); overlay.t=setTimeout(()=>o.hidden=true,ms); }
+let tLeft=TLIM,tInt=null,tOn=false;
+function stopTimer(){ clearInterval(tInt); tInt=null; tOn=false; }
+function drawTimer(){ const el=$("#timer"); if(!el)return; el.querySelector(".n").textContent=tLeft;
+  $("#tring").style.strokeDashoffset=TC*(1-tLeft/TLIM); el.classList.toggle("red",tOn&&tLeft<=5); el.classList.toggle("idle",!tOn);
+  el.querySelector(".s").textContent=tOn?"倒數中":(locked?"已鎖定":"聽完開始"); }
+function startTimer(){ if(tOn||locked||tInt)return; tOn=true; drawTimer();
+  tInt=setInterval(()=>{ tLeft--; SFX.tick(tLeft<=5); drawTimer(); if(tLeft<=0){ stopTimer(); timeUp(); } },1000); }
+function timeUp(){ if(locked)return; if(pick!==null) return lockIn(); doReveal(true); }
+let NAME="", CH=null;
+let r=0,pick=null,locked=false,score=0,over=false,used={f:false,c:false,t:false};
+const $=s=>document.querySelector(s), audio=new Audio();
+const hx=(inner,cls="")=>`<div class="hx ${cls}"><div class="o"><div class="i">${inner}</div></div></div>`;
+function rail(){
+  $("#rail").innerHTML=PRIZES.map((p,i)=>{
+    const c=i<score?"done":(over&&i===score)?"out":(!over&&i===r&&r<N)?"now":"";
+    return `<div class="${c}">${hx(p)}</div>`;}).join("");
+}
+function fmt(t){t=Math.max(0,t|0);return `${(t/60)|0}:${String(t%60).padStart(2,"0")}`}
+function bind(src,label,onEnd){
+  audio.pause(); const ring=$("#ring"),ico=$("#ico"),tm=$("#tm"),disc=$("#disc");
+  ring.style.strokeDashoffset=C;
+  if(!src){ disc.classList.remove("fresh"); disc.disabled=true; disc.onclick=null; ico.textContent="—"; tm.textContent=label||""; return; }
+  disc.disabled=false; audio.src=src; audio.load(); ico.textContent="▶"; tm.textContent="◀ 先按這裡聽回答"; disc.classList.add("fresh");
+  disc.onclick=()=>{ if(audio.paused){audio.play().catch(()=>{tm.textContent="播放失敗，請再點一次";});} else audio.pause(); };
+  audio.onplay=()=>{ico.textContent="❚❚"; disc.classList.remove("fresh");}; audio.onpause=()=>ico.textContent="▶"; audio.onended=()=>{ ico.textContent="↺"; if(onEnd) onEnd(); };
+  audio.ontimeupdate=()=>{ const p=audio.duration?audio.currentTime/audio.duration:0;
+    ring.style.strokeDashoffset=C*(1-p); tm.textContent=`${fmt(audio.currentTime)} / ${fmt(audio.duration||0)}`; };
+}
+const b64e=t=>btoa(String.fromCharCode(...new TextEncoder().encode(t))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d=t=>{try{const b=atob(t.replace(/-/g,"+").replace(/_/g,"/"));return new TextDecoder().decode(Uint8Array.from(b,c=>c.charCodeAt(0)));}catch(e){return "";}};
+const esc=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+(()=>{const m=/^#c([0-4])(?:~([A-Za-z0-9_-]+))?$/.exec(location.hash||""); if(m) CH={s:+m[1],n:m[2]?b64d(m[2]).slice(0,12):""};})();
+function intro(){
+  over=false; score=0; r=0; rail();
+  const who=CH?(CH.n?`【${esc(CH.n)}】`:"你的朋友"):"";
+  $("#stage").innerHTML=`<section class="start">
+    <img class="cover" src="cover.jpg" alt="問A答B 大挑戰 節目封面">
+    ${CH?`<div class="challenge">${hx(`<span>${who}答對 <b>${CH.s}</b> 題，拿下 <b class="gold">${CH.s?MONEY[CH.s-1]:"NT$ 0"}</b><br>你能贏過${CH.n?"他":"他"}嗎？</span>`)}</div>`:""}
+    <p class="lead">聽蔣市長的回答原音，猜記者原本問了什麼。<br>四題闖關，全對拿一百萬。<br><span class="nmlab">第一集：題目跟影片一樣</span></p>
+    <label class="nmlab" for="nm">你的暱稱（會印在成績圖上）</label>
+    <input id="nm" class="nm" maxlength="12" placeholder="例如：外送員W先生" value="${esc(NAME)}" autocomplete="nickname">
+    <button class="btn big" id="go">開始挑戰</button>
+  </section>`;
+  $("#go").onclick=()=>{ ac(); NAME=$("#nm").value.trim().slice(0,12); r=0; finalPick=null; render(); window.scrollTo({top:0}); };
+}
+function render(){
+  rail(); if(r>=N) return end();
+  const q=ROUNDS[r], pend=isPending(r); pick=null; locked=false; stopTimer(); tLeft=TLIM;
+  overlay("",`<div class="k3">${r===N-1?"FINAL QUESTION":"QUESTION "+(r+1)}</div><div class="k1">${NO[r]}</div><div class="k2">${MONEY[r]}</div>`,1400); SFX.whoosh();
+  $("#stage").innerHTML=`
+   <section class="player">
+     <button class="disc fresh" id="disc" aria-label="播放蔣市長的回答">
+       <svg viewBox="0 0 54 54"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffc062"/><stop offset="1" stop-color="#d06a00"/></linearGradient></defs><circle cx="27" cy="27" r="25" fill="url(#og)" stroke="rgba(255,230,180,.6)" stroke-width="2"/>
+       <circle id="ring" cx="27" cy="27" r="25" fill="none" stroke="#fff" stroke-width="3.5" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+       <span class="ico" id="ico">▶</span></button>
+     <div><div class="info" id="cap"><b>蔣市長的回答${q.bonus?'<span style="color:var(--gold);font-size:12px;margin-left:8px">網頁加碼題</span>':""}</b>${q.date}・${q.who}</div><div class="time" id="tm"></div></div>
+     <div class="timer idle" id="timer"><svg viewBox="0 0 62 62"><circle cx="31" cy="31" r="26" fill="rgba(4,14,36,.9)" stroke="rgba(80,230,255,.25)" stroke-width="5"/>
+       <circle id="tring" cx="31" cy="31" r="26" fill="none" stroke="#50e6ff" stroke-width="5" stroke-linecap="round" stroke-dasharray="${TC}" stroke-dashoffset="0"/></svg><span class="n">20</span><span class="s">聽完開始</span></div>
+   </section>
+   <section class="board">
+     <div class="row q">${hx(`${NO[r]}｜蔣市長這段回答，${q.asker}原本問的是？`)}</div>
+     <div class="opts">${q.opts.map((o,i)=>`<button class="loz row" data-i="${i}">${hx(`<span class="k">${"ABCD"[i]}:</span><span>${o}</span>`)}</button>`).join("")}</div>
+   </section>
+   <div class="foot">
+     <div class="lifes" ${pend?"hidden":""}>
+       <button class="life" id="lf" ${used.f?'disabled':''} aria-label="五十五十">50:50</button>
+       <button class="life" id="lc" ${used.c?'disabled':''} aria-label="問網友">問網友</button>
+       <button class="life" id="lt" ${used.t?'disabled':''} aria-label="看場合">看場合</button>
+     </div>
+     <button class="btn" id="lock" hidden>最後答案</button>
+   </div>
+   <div class="msg" id="msg"></div>`;
+  bind(q.a,null,startTimer); drawTimer();
+  document.querySelectorAll(".loz").forEach(b=>b.onclick=()=>{ if(locked)return;
+    document.querySelectorAll(".loz").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); pick=+b.dataset.i;
+    $("#lock").hidden=false; $("#msg").textContent=`你選了 ${"ABCD"[pick]}，確定就按「最後答案」`; });
+  $("#lock").onclick=lockIn;
+  $("#lf").onclick=()=>{ if(used.f||locked)return; used.f=true; $("#lf").disabled=true;
+    [0,1,2,3].filter(i=>i!==q.ans).sort(()=>Math.random()-.5).slice(0,2).forEach(i=>document.querySelector(`.loz[data-i="${i}"]`).classList.add("gone")); };
+  $("#lc").onclick=()=>{ if(used.c||locked)return; used.c=true; $("#lc").disabled=true; $("#msg").textContent=q.crowd; };
+  $("#lt").onclick=()=>{ if(used.t||locked)return; used.t=true; $("#lt").disabled=true; $("#msg").textContent=`${q.who}。${q.time}`; };
+}
+function lockIn(){
+  if(pick===null||locked)return; locked=true; stopTimer(); drawTimer(); SFX.lock(); audio.pause();
+  $("#lock").hidden=true; $("#msg").textContent="最後答案……";
+  const b=document.querySelector(`.loz[data-i="${pick}"]`); b.classList.add("sus");
+  setTimeout(()=>{ b.classList.remove("sus"); if(isPending(r)) lockFinal(); else doReveal(false); },1700);
+}
+function doReveal(timeout){
+  locked=true; stopTimer(); drawTimer(); const q=ROUNDS[r], ok=!timeout&&pick===q.ans; if(ok)score++; else over=true;
+  if(ok){ SFX.ok(); overlay("ok flash",`<div class="k1">恭喜答對！</div><div class="k2">${MONEY[score-1]}</div>`,1300); }
+  else { SFX.bad(); overlay("bad flash",`<div class="k1">${timeout?"時間到":"答錯了"}</div><div class="k3">正解是 ${"ABCD"[q.ans]}</div>`,1300); }
+  document.querySelector(`.loz[data-i="${q.ans}"]`).classList.remove("sel");
+  document.querySelector(`.loz[data-i="${q.ans}"]`).classList.add("ok");
+  if(!ok&&pick!==null){const b=document.querySelector(`.loz[data-i="${pick}"]`); b.classList.remove("sel"); b.classList.add("bad");}
+  $("#lock").hidden=true;
+  // 揭曉：完整原音（提問＋回答接在一起）＋完整提問與出處放在同一張原音字卡
+  const fullA=q.q?q.a.replace("_answer","_full"):q.a;
+  $("#cap").innerHTML=`<b>完整原音｜${q.asker}提問 → 蔣市長回答</b>
+    <div class="rvq"><span>${q.asker}原本問的是</span>${q.full}</div>
+    <div class="rvs">${q.date}・${q.who}　${q.src.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join("　")}</div>`;
+  $("#timer").hidden=true; $(".player").classList.add("rv"); $(".board").classList.add("rvd");
+  bind(fullA,null); audio.play().catch(()=>{});
+  const last=r===N-1;
+  document.querySelectorAll(".loz").forEach(b=>{const i=+b.dataset.i; if(i!==q.ans&&!(pick!==null&&i===pick&&!ok)) b.classList.add("dim");});
+  $(".lifes").hidden=true;
+  $("#msg").innerHTML=`<div class="reveal">
+     <div class="rv-top">${ok?`<span class="tag">答對了</span><span class="money">${MONEY[score-1]}</span>`:`<span class="tag bad">${timeout?"時間到":"答錯了"}・挑戰結束</span>`}</div>
+     <button class="btn" id="next">${(!ok||last)?"看結果":"下一題"}</button></div>`;
+  $("#next").onclick=()=>{ r= over?N:r+1; render(); window.scrollTo({top:0,behavior:"smooth"}); };
+  rail();
+}
+function lockFinal(){
+  locked=true; stopTimer(); finalPick=pick; const q=ROUNDS[r];
+  overlay("",`<div class="k3">FINAL ANSWER</div><div class="k1">答案鎖定 ${"ABCD"[pick]}</div><div class="k3">${Q4_DATE} 揭曉</div>`,1400);
+  $("#lock").hidden=true;
+  document.querySelectorAll(".loz").forEach(b=>{ if(+b.dataset.i!==pick) b.classList.add("dim"); });
+  $("#msg").innerHTML=`<div class="reveal">
+     <div class="rv-top"><span class="tag" style="color:var(--o1)">答案鎖定 ${"ABCD"[pick]}</span></div>
+     <div class="meta">最後一題的答案 ${Q4_DATE} 公布，先到影片留言區留下你的答案</div>
+     <button class="btn" id="next">看結果</button></div>`;
+  $("#next").onclick=()=>{ r=N; render(); window.scrollTo({top:0,behavior:"smooth"}); };
+}
+
+/* ---------- 成績圖（節目字卡樣式） ---------- */
+function hexPath(g,x0,y0,x1,y1){const m=(y0+y1)/2,c=(y1-y0)/2*0.55;g.beginPath();g.moveTo(x0+c,y0);g.lineTo(x1-c,y0);g.lineTo(x1,m);g.lineTo(x1-c,y1);g.lineTo(x0+c,y1);g.lineTo(x0,m);g.closePath();}
+function lozenge(g,x0,y0,x1,y1,state="idle",edge="#50e6ff"){
+  const F={idle:["rgba(8,22,48,.96)","rgba(2,8,22,.96)"],lock:["#faa028","#be5a00"],ok:["#46d778","#0a7837"],bad:["#e0503c","#821810"]}[state];
+  const gr=g.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,F[0]); gr.addColorStop(1,F[1]);
+  hexPath(g,x0,y0,x1,y1); g.fillStyle=gr; g.fill();
+  const gl=g.createLinearGradient(0,y0,0,(y0+y1)/2); gl.addColorStop(0,"rgba(255,255,255,.16)"); gl.addColorStop(1,"rgba(255,255,255,0)");
+  g.fillStyle=gl; g.fill();
+  g.save(); g.shadowColor=edge; g.shadowBlur=18; g.strokeStyle=edge; g.lineWidth=4; hexPath(g,x0,y0,x1,y1); g.stroke(); g.restore();
+}
+function hline(g,y,x0,x1){g.save();g.shadowColor="#50e6ff";g.shadowBlur=14;g.strokeStyle="rgba(80,230,255,.85)";g.lineWidth=3;g.beginPath();g.moveTo(x0,y);g.lineTo(x1,y);g.stroke();g.restore();}
+function metal(g,txt,x,y,font,stops){
+  g.font=font; const m=g.measureText(txt), h=m.actualBoundingBoxAscent+m.actualBoundingBoxDescent;
+  const gr=g.createLinearGradient(0,y-h/2,0,y+h/2); stops.forEach(([o,c])=>gr.addColorStop(o,c));
+  g.save(); g.shadowColor="rgba(0,0,0,.8)"; g.shadowBlur=14; g.shadowOffsetY=5; g.fillStyle=gr; g.fillText(txt,x,y); g.restore();
+}
+const SILVER=[[0,"#ffffff"],[.48,"#dfe8f2"],[.55,"#8fa9c4"],[1,"#eef3f8"]], GOLDM=[[0,"#fff2c0"],[.55,"#e1a03c"],[1,"#ffe39a"]];
+function drawCard(cv,qr){
+  const g=cv.getContext("2d"), W=cv.width, H=cv.height, off=(H-1350)/2, Y=y=>off+y;
+  const sans='"Noto Sans TC","PingFang TC",sans-serif', num='"Barlow Condensed","Arial Narrow",sans-serif';
+  const T=TITLES[score], money=score?MONEY[score-1]:"NT$ 0";
+  g.fillStyle="#01040d"; g.fillRect(0,0,W,H);
+  let rg=g.createRadialGradient(W/2,0,10,W/2,0,H*.55); rg.addColorStop(0,"rgba(80,200,255,.38)"); rg.addColorStop(1,"rgba(80,200,255,0)"); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  rg=g.createRadialGradient(W/2,H,10,W/2,H,H*.5); rg.addColorStop(0,"rgba(20,70,140,.5)"); rg.addColorStop(1,"rgba(20,70,140,0)"); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  g.textAlign="center"; g.textBaseline="middle";
+  g.save(); g.shadowColor="#50e6ff"; g.shadowBlur=30; g.font=`900 ${W*.14}px ${sans}`; g.fillStyle="rgba(80,230,255,.35)"; g.fillText("問A答B",W/2,Y(150)); g.restore();
+  metal(g,"問A答B",W/2,Y(150),`900 ${W*.14}px ${sans}`,SILVER);
+  g.letterSpacing=`${W*.03}px`; metal(g,"大挑戰",W/2+W*.015,Y(270),`900 ${W*.07}px ${sans}`,GOLDM); g.letterSpacing="0px";
+  { g.font=`700 ${W*.026}px "Inter Tight",sans-serif`; const w1=g.measureText("YES100 ").width; g.font=`400 ${W*.026}px "Roboto Condensed",sans-serif`; const w2=g.measureText("SERIES").width;
+    const x0=W/2-(w1+w2)/2; g.textAlign="left"; g.fillStyle="#f2eee6"; g.font=`700 ${W*.026}px "Inter Tight",sans-serif`; g.fillText("YES100 ",x0,Y(46));
+    g.font=`400 ${W*.026}px "Roboto Condensed",sans-serif`; g.fillText("SERIES",x0+w1,Y(46)); g.fillStyle="#ce201c"; g.fillRect(x0-W*.018,Y(46)-W*.014,W*.005,W*.028); g.textAlign="center"; }
+  hline(g,Y(318),W*.12,W*.88);
+  if(NAME){ g.font=`700 ${W*.04}px ${sans}`; g.fillStyle="#f4c45c"; g.fillText(`參賽者　${NAME}`,W/2,Y(362)); }
+  g.font=`700 ${W*.062}px ${sans}`; g.fillStyle="#f6f8fc";
+  const fp=finalPick!==null&&!over;
+  g.fillText(over?`答對 ${score} / ${N} 題`:fp?`前 ${N-1} 題全對！`:`${N} 題全對！`,W/2,Y(NAME?418:390));
+  g.font=`500 ${W*.034}px ${sans}`; g.fillStyle=over?"#ff7a66":"#8fe0a8";
+  g.fillText(over?`第 ${score+1} 題出局`:fp?`最後一題我選 ${"ABCD"[finalPick]}，${Q4_DATE} 揭曉`:"一百萬，全部帶回家",W/2,Y(NAME?484:455));
+  const py0=Y(505),py1=py0+W*.15; hline(g,(py0+py1)/2,0,W*.1); hline(g,(py0+py1)/2,W*.9,W);
+  lozenge(g,W*.1,py0,W*.9,py1,"idle","#fac86e");
+  metal(g,money,W/2,(py0+py1)/2+W*.005,`700 ${W*.1}px ${num}`,GOLDM);
+  const ly=Y(700), lw=W*.2, lg=W*.015, lx0=(W-(lw*4+lg*3))/2, lh=W*.075;
+  hline(g,ly+lh/2,0,W);
+  PRIZES.forEach((p,i)=>{ const x=lx0+i*(lw+lg), st=i<score?"ok":(over&&i===score)?"bad":(finalPick!==null&&!over&&i===N-1)?"lock":"idle";
+    lozenge(g,x,ly,x+lw,ly+lh,st); g.font=`700 ${W*.04}px ${num}`; g.fillStyle=st==="idle"?"#8fa6bf":"#fff"; g.fillText(p,x+lw/2,ly+lh/2+2); });
+  g.font=`500 ${W*.032}px ${sans}`; g.fillStyle="#8fa6bf"; g.letterSpacing=`${W*.006}px`; g.fillText("我對市長的熟悉程度",W/2,Y(835)); g.letterSpacing="0px";
+  const ty0=Y(870), ty1=ty0+W*.12; g.font=`900 ${W*.07}px ${sans}`; const tw=Math.max(W*.5,g.measureText(T.n).width+W*.2);
+  lozenge(g,W/2-tw/2,ty0,W/2+tw/2,ty1,"lock"); g.fillStyle="#fff"; g.fillText(T.n,W/2,(ty0+ty1)/2+3);
+  g.font=`500 ${W*.036}px ${sans}`; g.fillStyle="#f6f8fc"; g.fillText(T.d,W/2,Y(1060));
+  g.font=`400 ${W*.03}px ${sans}`; g.fillStyle="#aad7e6"; g.fillText("先聽市長的回答，你猜得出記者問了什麼嗎？",W/2,Y(1108));
+  const d=new Date(), ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+  const qs=168, qx=W*.92-qs, qy=Y(1148);
+  if(qr){ g.fillStyle="#fff"; g.fillRect(qx-10,qy-10,qs+20,qs+20); g.imageSmoothingEnabled=false; g.drawImage(qr,qx,qy,qs,qs); g.imageSmoothingEnabled=true; }
+  g.textAlign="left"; const lx=W*.08;
+  g.font=`700 ${W*.04}px ${sans}`; g.fillStyle="#f4c45c"; g.fillText("#問A答B大挑戰",lx,Y(1185));
+  g.font=`500 ${W*.03}px ${sans}`; g.fillStyle="#f6f8fc"; g.fillText("掃 QR code 挑戰，看你能拿幾萬",lx,Y(1240));
+  g.font=`600 ${W*.026}px ${num}`; g.fillStyle="#8fa6bf"; g.fillText(`${ds}　YES100 AI VISUAL LAB`,lx,Y(1290)); g.textAlign="center";
+}
+function end(){
+  audio.pause(); stopTimer(); rail();
+  const T=TITLES[score], money=score?MONEY[score-1]:"NT$ 0";
+  const LINK=SHARE_URL+"#c"+score+(NAME?"~"+b64e(NAME):"");
+  const fp=finalPick!==null&&!over;
+  const text=`${NAME?NAME+"：":""}我在《問A答B大挑戰》答對 ${score}／${N} 題，贏得 ${money}！${fp?`最後一題我選 ${"ABCD"[finalPick]}，${Q4_DATE} 揭曉。`:""}\n對市長的熟悉程度：「${T.n}」\n先聽市長的回答，猜記者問了什麼——你敢來挑戰嗎？ #問A答B大挑戰`;
+  const full=`${text}\n${LINK}`;
+  $("#stage").innerHTML=`<section class="end">
+    <img id="card" class="cardimg" alt="成績圖：答對 ${score} 題，${money}，${T.n}">
+    <div class="share"><button class="btn main" id="sMain">分享成績圖　IG・FB・LINE</button></div>
+    <div class="end-row">
+      <a class="btn ghost" id="sTH" target="_blank" rel="noopener">Threads</a>
+      <button class="btn ghost" id="cp">複製文字</button>
+      <button class="btn ghost" id="again">再玩一次</button>
+    </div>
+    <div class="linkbox"><code id="lk"></code><button class="btn" id="cpl">複製連結</button></div>
+    <div class="msg" id="smsg"></div>
+    <textarea id="stext" class="stext" readonly hidden></textarea>
+  </section>`;
+  $("#lk").textContent=LINK;
+  const post=document.createElement("canvas"); post.width=1080; post.height=1350;
+  let qr=null; try{ const box=document.createElement("div"); new QRCode(box,{text:LINK,width:352,height:352,correctLevel:QRCode.CorrectLevel.M}); qr=box.querySelector("canvas"); }catch(e){}
+  let blob=null;
+  const draw=()=>{ drawCard(post,qr); $("#card").src=post.toDataURL("image/png"); post.toBlob(b=>blob=b,"image/png"); };
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(draw); draw();
+  const msg=t=>$("#smsg").textContent=t;
+  const copyStr=async str=>{ try{ await navigator.clipboard.writeText(str); return true; }catch(e){ const t=$("#stext"); t.hidden=false; t.value=str; t.select(); return false; } };
+  let DL=null; try{ window.claude&&claude.use&&claude.use("downloads").then(d=>DL=d).catch(()=>{}); }catch(e){}
+  // 分享成績圖：瀏覽器有系統分享就用；在 Claude App 裡改走 downloads（iOS 會跳出系統分享選單，可直接選 IG／FB／LINE）；都不行才請人長按存圖
+  $("#sMain").onclick=async()=>{
+    const c=await copyStr(full); const fname="問A答B大挑戰_成績.png";
+    if(!blob) return msg("成績圖還在產生，再按一次");
+    try{ const f=new File([blob],fname,{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return msg(c?"說明文字和連結已複製，發文時貼上就好。":""); } }
+    catch(e){ if(e&&e.name==="AbortError") return; }
+    if(DL){ try{ await DL.save({filename:fname,data:blob}); return msg((c?"說明文字和連結已複製。":"")+"在分享選單選 Instagram、Facebook 或 LINE，貼上文字就好。"); }
+      catch(e){ if(e&&e.code==="declined") return; } }
+    msg((c?"說明文字和連結已複製。":"")+"長按上面的成績圖儲存，再到 IG／FB 發文並貼上。");
+  };
+  $("#sTH").href=`https://www.threads.net/intent/post?text=${encodeURIComponent(full)}`;
+  $("#cp").onclick=async()=>{ msg(await copyStr(full)?"成績文字和連結已複製":"在下面的框裡複製文字"); };
+  $("#cpl").onclick=async()=>{ msg(await copyStr(LINK)?"連結已複製，傳給朋友就能挑戰你的分數":"在下面的框裡複製連結"); };
+  $("#again").onclick=()=>{r=0;score=0;over=false;finalPick=null;used={f:false,c:false,t:false};CH=null;intro();};
+}
+intro();
+{ const sc=$("#series"); const off=()=>sc&&sc.remove(); sc.onclick=off; sc.addEventListener("animationend",e=>{ if(e.target===sc) off(); }); }
+</script>
+</body>
+</html>
