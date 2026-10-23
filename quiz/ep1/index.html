@@ -440,24 +440,18 @@ function drawCard(cv,qr){
     const x0=W/2-(w1+w2)/2; g.textAlign="left"; g.fillStyle="#f2eee6"; g.font=`700 ${W*.026}px "Inter Tight",sans-serif`; g.fillText("YES100 ",x0,Y(46));
     g.font=`400 ${W*.026}px "Roboto Condensed",sans-serif`; g.fillText("SERIES",x0+w1,Y(46)); g.fillStyle="#ce201c"; g.fillRect(x0-W*.018,Y(46)-W*.014,W*.005,W*.028); g.textAlign="center"; }
   hline(g,Y(318),W*.12,W*.88);
-  if(NAME){ g.font=`700 ${W*.04}px ${sans}`; g.fillStyle="#f4c45c"; g.fillText(`參賽者　${NAME}`,W/2,Y(362)); }
-  g.font=`700 ${W*.062}px ${sans}`; g.fillStyle="#f6f8fc";
+  if(NAME){ g.font=`700 ${W*.04}px ${sans}`; g.fillStyle="#f4c45c"; g.fillText(`參賽者　${NAME}`,W/2,Y(372)); }
+  /* 2026-10-23 精簡：只留金額＋稱號，拿掉「答對幾題／第幾題出局」與獎金階梯 */
   const fp=finalPick!==null&&!over;
-  g.fillText(over?`答對 ${score} / ${N} 題`:fp?`前 ${N-1} 題全對！`:`${N} 題全對！`,W/2,Y(NAME?418:390));
-  g.font=`500 ${W*.034}px ${sans}`; g.fillStyle=over?"#ff7a66":"#8fe0a8";
-  g.fillText(over?`第 ${score+1} 題出局`:fp?`最後一題我選 ${"ABCD"[finalPick]}，${Q4_DATE} 揭曉`:"一百萬，全部帶回家",W/2,Y(NAME?484:455));
-  const py0=Y(505),py1=py0+W*.15; hline(g,(py0+py1)/2,0,W*.1); hline(g,(py0+py1)/2,W*.9,W);
+  const py0=Y(430),py1=py0+W*.15; hline(g,(py0+py1)/2,0,W*.1); hline(g,(py0+py1)/2,W*.9,W);
   lozenge(g,W*.1,py0,W*.9,py1,"idle","#fac86e");
   metal(g,money,W/2,(py0+py1)/2+W*.005,`700 ${W*.1}px ${num}`,GOLDM);
-  const ly=Y(700), lw=W*.2, lg=W*.015, lx0=(W-(lw*4+lg*3))/2, lh=W*.075;
-  hline(g,ly+lh/2,0,W);
-  PRIZES.forEach((p,i)=>{ const x=lx0+i*(lw+lg), st=i<score?"ok":(over&&i===score)?"bad":(finalPick!==null&&!over&&i===N-1)?"lock":"idle";
-    lozenge(g,x,ly,x+lw,ly+lh,st); g.font=`700 ${W*.04}px ${num}`; g.fillStyle=st==="idle"?"#8fa6bf":"#fff"; g.fillText(p,x+lw/2,ly+lh/2+2); });
-  g.font=`500 ${W*.032}px ${sans}`; g.fillStyle="#8fa6bf"; g.letterSpacing=`${W*.006}px`; g.fillText("我對市長的熟悉程度",W/2,Y(835)); g.letterSpacing="0px";
-  const ty0=Y(870), ty1=ty0+W*.12; g.font=`900 ${W*.07}px ${sans}`; const tw=Math.max(W*.5,g.measureText(T.n).width+W*.2);
+  if(fp){ g.font=`500 ${W*.034}px ${sans}`; g.fillStyle="#8fe0a8"; g.fillText(`最後一題我選 ${"ABCD"[finalPick]}，${Q4_DATE} 揭曉`,W/2,Y(650)); }
+  g.font=`500 ${W*.032}px ${sans}`; g.fillStyle="#8fa6bf"; g.letterSpacing=`${W*.006}px`; g.fillText("我對市長的熟悉程度",W/2,Y(745)); g.letterSpacing="0px";
+  const ty0=Y(785), ty1=ty0+W*.12; g.font=`900 ${W*.07}px ${sans}`; const tw=Math.max(W*.5,g.measureText(T.n).width+W*.2);
   lozenge(g,W/2-tw/2,ty0,W/2+tw/2,ty1,"lock"); g.fillStyle="#fff"; g.fillText(T.n,W/2,(ty0+ty1)/2+3);
-  g.font=`500 ${W*.036}px ${sans}`; g.fillStyle="#f6f8fc"; g.fillText(T.d,W/2,Y(1060));
-  g.font=`400 ${W*.03}px ${sans}`; g.fillStyle="#aad7e6"; g.fillText("先聽市長的回答，你猜得出記者問了什麼嗎？",W/2,Y(1108));
+  g.font=`500 ${W*.036}px ${sans}`; g.fillStyle="#f6f8fc"; g.fillText(T.d,W/2,Y(990));
+  g.font=`400 ${W*.03}px ${sans}`; g.fillStyle="#aad7e6"; g.fillText("先聽市長的回答，你猜得出記者問了什麼嗎？",W/2,Y(1045));
   const d=new Date(), ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
   const qs=168, qx=W*.92-qs, qy=Y(1148);
   if(qr){ g.fillStyle="#fff"; g.fillRect(qx-10,qy-10,qs+20,qs+20); g.imageSmoothingEnabled=false; g.drawImage(qr,qx,qy,qs,qs); g.imageSmoothingEnabled=true; }
