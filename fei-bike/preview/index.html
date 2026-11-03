@@ -11,6 +11,7 @@
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website">
 <style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<!-- © 2026 Yes100 AI Visual Lab. All rights reserved. -->
 <title>妃妃鐵馬路線地圖</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -185,7 +186,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
       <section class="card">
         <details id="turnBox"><summary>完整路線（<span id="nTurns"></span> 個路口）</summary><ul class="turns" id="turns"></ul></details>
       </section>
-      <p class="foot">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。支持者自製​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​，非官方。</p>
+      <p class="foot">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。支持者自製​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​，非官方。<br>© 2026 Yes100 AI Visual Lab</p>
     </div>
   </div>
 </div>
@@ -516,7 +517,7 @@ function drawCard(o,fmt){
   g2.font='700 34px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#6b6f63';
   g2.fillText(o.kind==='live'?'即時位置與路線都在這裡 →':'⏰ 預估時間會有誤差，請提早 10 分鐘到路邊等待',70,y3+62);
   g2.font='600 36px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(SITE_URL.replace('https://',''),70,y3+(o.kind==='live'?120:118));
-  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('支持者自製・非官方',70,H-40);
+  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('支持者自製・非官方｜© Yes100 AI Visual Lab',70,H-40);
   return c;
 }
 function fmt2(m){return fmt(m);}
