@@ -138,7 +138,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
 .daybar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13.5px;color:var(--muted)}
 .daybar b{color:var(--ink)}
 .daybar button{border:2px solid var(--pink);background:var(--panel);color:var(--pink);border-radius:9px;padding:3px 10px;font:900 13px var(--body);cursor:pointer}
-.daybar .pend{display:inline-flex;align-items:center;gap:6px}.daybar .pend i{width:24px;border-top:3px dashed var(--purple)}
+.daybar .pend{display:inline-flex;align-items:center;gap:6px}.daybar .pend i{width:24px;border-top:3px dashed var(--green)}
 .donestamp{position:absolute;right:18px;top:54px;width:132px;height:132px;border:5px solid var(--pink);border-radius:50%;color:var(--pink);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);background:color-mix(in srgb,var(--panel) 70%,transparent);pointer-events:none;animation:stampin .5s cubic-bezier(.2,1.6,.4,1)}
 .donestamp b{font:900 54px/1 "Noto Serif TC","Songti TC",serif}
 .donestamp span{font:900 12.5px var(--body);text-align:center;line-height:1.3;margin-top:4px}
@@ -300,8 +300,7 @@ function draw(){
   // 本段路線：全段淡、走過的實線
   line(G);g.strokeStyle=C.gsoft;g.lineWidth=7;g.stroke();
   if(hl){g.save();g.strokeStyle=C.pink;g.lineWidth=10;g.globalAlpha=.6;hl.forEach(r=>{line(G.slice(r[0],Math.max(r[1],r[0]+1)+1));g.stroke();});g.restore();}
-  (L.pending||[]).forEach(([a,b])=>{g.save();line(G.slice(a,b+1));g.strokeStyle=C.paper;g.lineWidth=7;g.stroke();g.strokeStyle=css('--purple');g.lineWidth=4.5;g.setLineDash([9,6]);g.stroke();g.restore();
-    const [x,y]=S(G[(a+b)>>1]);g.beginPath();g.arc(x,y,9,0,7);g.fillStyle=css('--purple');g.fill();g.font=`900 12px ${css('--display')}`;g.textAlign='center';g.fillStyle='#fff';g.fillText('?',x,y+4);});
+  (L.pending||[]).forEach(([a,b])=>{g.save();line(G.slice(a,b+1));g.strokeStyle=C.paper;g.lineWidth=7;g.stroke();g.strokeStyle=C.green;g.lineWidth=4.5;g.setLineDash([9,7]);g.stroke();g.restore();});
   const n=Math.floor(prog*(G.length-1));
   const head=posAt(prog);
   line([...G.slice(0,n+1),head]);g.strokeStyle=C.green;g.lineWidth=5;g.stroke();
@@ -387,7 +386,7 @@ function ask(name){
   if(pendNote(runs[0][0]))$('ans').insertAdjacentHTML('beforeend',pendNote(runs[0][0]));
   zoomTo(G.slice(runs[0][0],runs[0][1]+1));setProg(runs[0][0]/(G.length-1));}
 function show(h){const a=$('ans');a.innerHTML=h;a.hidden=false;}
-function pendNote(i){const p=(leg().pending||[]).find(([a,b])=>i>=a-3&&i<=b+3);return p?`<div class="hint" style="color:var(--purple);font-weight:700">⚠ 這附近是暫估路段：${p[2]}團隊確認後會更新。</div>`:'';}
+function pendNote(i){const p=(leg().pending||[]).find(([a,b])=>i>=a-3&&i<=b+3);return p?`<div class="hint" style="color:var(--green);font-weight:700">這附近是暫估路段：${p[2]}團隊確認後會更新。</div>`:'';}
 function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]=Math.min(a[0],q[0]);a[1]=Math.min(a[1],q[1]);a[2]=Math.max(a[2],q[0]);a[3]=Math.max(a[3],q[1]);});
   cam.cx=(a[0]+a[2])/2;cam.cy=(a[1]+a[3])/2;cam.s=Math.max(FIT_S*2.5,Math.min(FIT_S*3.5,(W-80)/Math.max(1e-6,a[2]-a[0]),(H-200)/Math.max(1e-6,a[3]-a[1])));draw();}
 function askPoint(p){const L=leg(),G=L.geom;let bi=0,bd=1e12;G.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;bi=i;}});
@@ -445,7 +444,7 @@ function dayBar(){const D=DATA.days[DAY],pk=pickDay(),t=isoOf(new Date());
   const L0=D.legs[0];h+=`<span>${L0.gather?L0.gather+' 集合・':''}${L0.start} 出發</span>`;
   if(D.date>t)h+='<span>・下一場行程</span>';
   if(DAY!==pk)h+=`<button id="backToday">回到${DATA.days[pk].date===t?'今天':'下一場'}行程</button>`;
-  if(D.legs.some(L=>(L.pending||[]).length))h+='<span class="pend"><i></i>紫色虛線＝等團隊確認的暫估路段</span>';
+  if(D.legs.some(L=>(L.pending||[]).length))h+='<span class="pend"><i></i>綠色虛線＝暫估路段，團隊確認後更新</span>';
   $('daybar').innerHTML=h;const b=$('backToday');if(b)b.onclick=()=>{userDay=false;useDay(pickDay());};}
 function stampOverlay(){const el=$('done');if(!dayDone(DAY)){el.hidden=true;return;}const D=DATA.days[DAY];
   const km=D.legs.reduce((a,L)=>a+L.km,0);el.innerHTML=`<b>妃</b><span>${dLabel(D.date).replace(/（.）/,'')} ${D.title}<br>完成 ${km.toFixed(1)} 公里</span>`;el.hidden=false;}
