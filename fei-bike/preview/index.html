@@ -115,10 +115,36 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
 .confetti{position:absolute;top:30%;width:9px;height:14px;pointer-events:none;animation:fall 1.8s cubic-bezier(.2,.6,.4,1) forwards}
 @keyframes fall{to{transform:translate(var(--dx),300px) rotate(var(--r));opacity:0}}
 @media (prefers-reduced-motion:reduce){.toast,.confetti,.homechip.soon{animation:none}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btnrow .save{margin-top:0}
+.sharebtn{border:0;background:var(--pink);color:#fff;border-radius:10px;padding:8px 12px;font:900 14px var(--body);cursor:pointer}
+.mapshare{position:absolute;left:10px;top:118px;border:0;background:var(--pink);color:#fff;border-radius:9px;padding:5px 11px;font:900 13.5px var(--body);cursor:pointer;box-shadow:0 2px 8px rgba(216,30,91,.3)}
+.sheet{position:fixed;inset:0;background:rgba(20,26,22,.62);z-index:50;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+[hidden]{display:none!important}
+.sheetbox{background:var(--panel);border-radius:18px;padding:14px;max-width:440px;width:100%;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.sheetbox h3{margin:0;font:900 17px var(--display);color:var(--green)}
+.sheetbox img{width:100%;border-radius:12px;border:1px solid var(--line);background:var(--paper)}
+.fmt{display:flex;gap:6px}
+.fmt button{flex:1;border:2px solid var(--green);background:transparent;color:var(--green);border-radius:9px;padding:6px;font:700 14px var(--body);cursor:pointer}
+.fmt button[aria-pressed="true"]{background:var(--green);color:#fff}
+.sheetbox .big{border:0;background:var(--pink);color:#fff;border-radius:12px;padding:12px;font:900 17px var(--body);cursor:pointer}
+.sheetbox .ghost{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:9px;font:700 15px var(--body);cursor:pointer}
+.sheetbox .hint{margin:0;text-align:center}
 </style>
 </head>
 <body>
 
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetT">
+  <div class="sheetbox">
+    <h3 id="sheetT">分享卡</h3>
+    <div class="fmt"><button id="fPost" aria-pressed="true">LINE／貼文</button><button id="fStory" aria-pressed="false">IG 限動</button></div>
+    <img id="cardImg" alt="分享卡預覽">
+    <button class="big" id="doShare">📤 分享出去</button>
+    <button class="ghost" id="doSave">存到手機</button>
+    <p class="hint">存不了的話：長按上面的圖片 →「儲存圖片」</p>
+    <button class="ghost" id="closeSheet">關閉</button>
+  </div>
+</div>
 <div class="wrap">
   <header>
     <div class="brand"><img class="avatar" src="data:image/jpeg;base64,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" alt="Q版妃妃">
@@ -135,6 +161,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
       <div class="livebar" id="livebar" hidden></div>
       <div class="homechip" id="home" hidden></div>
       <div id="fx"></div>
+      <button class="mapshare" id="shareLive" hidden>📤 分享妃妃現在在哪</button>
       <div class="mapbtns"><button id="zin" aria-label="放大">＋</button><button id="zout" aria-label="縮小">－</button><button id="fit" aria-label="看整條路線">⤢</button></div>
       <div class="player">
         <button class="play" id="play" aria-label="播放">▶</button>
@@ -300,8 +327,9 @@ function ask(name){
   // 時間上 5 分鐘內的段落合併，同一分鐘不寫區間
   const tr=[];runs.forEach(r=>{const a=L.T[r[0]],b=L.T[r[1]];const l=tr[tr.length-1];if(l&&a-l[1]<5)l[1]=b;else tr.push([a,b]);});
   const dl=LIVE.delay??0; const txt=tr.slice(0,4).map(([a,b])=>[a+dl,b+dl]).map(([a,b])=>`<strong>${fmt(a)}</strong>${b-a>=2?`到 ${fmt(b)} `:''}`).join('、')+(tr.length>4?' 等':'');
-  show(`預計 ${txt}經過「${name}」${delayNote()}<br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button><br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span>`);
+  show(`預計 ${txt}經過「${name}」${delayNote()}<div class="btnrow"><button class="sharebtn" id="mkCard">📤 做成分享卡</button><button class="save" id="saveHome">📍 設成我家，快到時提醒我</button></div><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span>`);
   $('saveHome').onclick=()=>saveHome({leg:LEG,i:runs[0][0],name});
+  $('mkCard').onclick=()=>openCard({kind:'wait',leg:LEG,i:runs[0][0],name,t:tr[0][0]+(LIVE.mode==='live'?LIVE.delay||0:0)});
   zoomTo(G.slice(runs[0][0],runs[0][1]+1));setProg(runs[0][0]/(G.length-1));}
 function show(h){const a=$('ans');a.innerHTML=h;a.hidden=false;}
 function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]=Math.min(a[0],q[0]);a[1]=Math.min(a[1],q[1]);a[2]=Math.max(a[2],q[0]);a[3]=Math.max(a[3],q[1]);});
@@ -309,8 +337,10 @@ function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]
 function askPoint(p){const L=leg(),G=L.geom;let bi=0,bd=1e12;G.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;bi=i;}});
   pin={p,q:G[bi]};hl=null;
   if(bd>1500){show(`這裡離${L.district}路線約 ${(bd/1000).toFixed(1)} 公里，今天這段應該騎不到附近。`);}
-  else{show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}<br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span><br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button>`);
-    $('saveHome').onclick=()=>saveHome({leg:LEG,i:bi,name:'你標的位置'});}
+  else{show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}<br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span><div class="btnrow"><button class="sharebtn" id="mkCard">📤 做成分享卡</button><button class="save" id="saveHome">📍 設成我家，快到時提醒我</button></div>`);
+    $('saveHome').onclick=()=>saveHome({leg:LEG,i:bi,name:'你標的位置'});
+    const sg=L.segs.filter(x=>!x.temple&&x.i0<=bi).pop();
+    $('mkCard').onclick=()=>openCard({kind:'wait',leg:LEG,i:bi,name:sg?sg.name:L.district,t:L.T[bi]+(LIVE.mode==='live'?LIVE.delay||0:0)});}
   setProg(bi/(G.length-1));}
 
 // 拖曳、縮放、雙指
@@ -385,7 +415,7 @@ function stopNote(){
 }
 LIVE.hist=[];LIVE.mode='plan';
 function setBar(html){const b=$('livebar');b.hidden=!html;b.innerHTML=html||'';}
-function planMode(msg){LIVE.mode='plan';LIVE.delay=null;setBar(msg);homeChip();draw();}
+function planMode(msg){$('shareLive').hidden=true;LIVE.mode='plan';LIVE.delay=null;setBar(msg);homeChip();draw();}
 async function pollLive(){
   let d;
   try{const r=await fetch('https://gps.godroad.tw/Sever?SA_ID=E261101',{cache:'no-store'});d=(await r.json())[0];}catch(e){d=null;}
@@ -426,9 +456,85 @@ async function pollLive(){
   const lag=Math.abs(dl)<3?'準時':`${dl>0?'晚':'早'} ${Math.abs(dl)} 分`;
   setBar(age>5?`訊號中斷 ${Math.round(age)} 分鐘・最後在${where}`:`即時 ${t.slice(11,16)}・${st||where}・<b>${lag}</b>`);
   if(LIVE.k===LEG&&Date.now()-userAt>20000){$('clk').textContent=t.slice(11,16);$('clkSub').textContent=`即時位置・${APP.legs[LIVE.k].district}`;}
+  $('shareLive').hidden=age>5;LIVE.where=st||where;LIVE.hm=t.slice(11,16);
   homeChip();draw();
 }
 pollLive();setInterval(pollLive,30000);
+
+// ── 分享卡：在手機上用 canvas 畫，不上傳任何東西 ──
+let CARD=null,FMT='post';
+const SITE_URL='https://willie-yes100.github.io/fei-bike/';
+function dateLabel(){const d=new Date(APP.date+'T00:00:00');return `${d.getMonth()+1}/${d.getDate()}（${'日一二三四五六'[d.getDay()]}）`;}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);}
+function fitText(c,txt,max,size,weight){let s=size;do{c.font=`${weight} ${s}px "Noto Sans TC","PingFang TC",sans-serif`;s-=2;}while(c.measureText(txt).width>max&&s>20);return s+2;}
+function miniMap(c,x,y,w,h,L,i){
+  // 以這個點為中心的路線小地圖
+  const ctr=L.geom[i],span=0.012;const sx=w/(span*2*KX),sy=sx;
+  const M=p=>[x+w/2+(p[0]-ctr[0])*KX*sx,y+h/2-(p[1]-ctr[1])*sy];
+  c.save();rr(c,x,y,w,h,28);c.clip();c.fillStyle='#fffdf8';c.fillRect(x,y,w,h);
+  c.lineCap='round';c.lineJoin='round';
+  APP.streets.forEach(s=>{if(s.r>2&&span>0.02)return;const pts=s.g;if(!pts.some(p=>Math.abs(p[0]-ctr[0])<span*1.4&&Math.abs(p[1]-ctr[1])<span*1.4))return;
+    c.beginPath();pts.forEach((p,k)=>{const [a,b]=M(p);k?c.lineTo(a,b):c.moveTo(a,b);});c.strokeStyle=s.r<=1?'#cdbf9f':'#e3dac6';c.lineWidth=s.r===0?7:s.r===1?5.5:s.r===2?4:2.4;c.stroke();});
+  c.beginPath();L.geom.forEach((p,k)=>{const [a,b]=M(p);k?c.lineTo(a,b):c.moveTo(a,b);});c.strokeStyle='#b5d3be';c.lineWidth=14;c.stroke();
+  c.beginPath();L.geom.slice(0,i+1).forEach((p,k)=>{const [a,b]=M(p);k?c.lineTo(a,b):c.moveTo(a,b);});c.strokeStyle='#1d5a37';c.lineWidth=10;c.stroke();
+  const [px,py]=M(ctr);c.beginPath();c.arc(px,py,30,0,7);c.fillStyle='rgba(216,30,91,.22)';c.fill();c.beginPath();c.arc(px,py,15,0,7);c.fillStyle='#d81e5b';c.fill();c.lineWidth=6;c.strokeStyle='#fff';c.stroke();
+  c.restore();rr(c,x,y,w,h,28);c.lineWidth=4;c.strokeStyle='#e4dccb';c.stroke();
+}
+function drawCard(o,fmt){
+  const W=1080,H=fmt==='story'?1920:1350,c=document.createElement('canvas');c.width=W;c.height=H;const g2=c.getContext('2d');
+  const L=APP.legs[o.leg],green='#1d5a37',pink='#d81e5b',ink='#1d2a22',paper='#f7f3ea';
+  g2.fillStyle=paper;g2.fillRect(0,0,W,H);
+  // 頂部：口號
+  const top=fmt==='story'?150:70;
+  g2.textBaseline='alphabetic';
+  g2.font='900 92px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=green;g2.fillText('鐵馬妃起來',70,top+90);
+  g2.save();g2.translate(560,top+30);g2.rotate(-0.05);g2.fillStyle=pink;rr(g2,0,-20,450,110,18);g2.fill();g2.font='900 80px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#fff';g2.fillText('人民當靠3',22,68);g2.restore();
+  // 日期＋區
+  const y1=top+170;g2.fillStyle=pink;rr(g2,70,y1,330,74,37);g2.fill();g2.font='900 46px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#fff';g2.fillText(dateLabel(),100,y1+53);
+  g2.font='900 46px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=green;g2.fillText(`${L.district}・妃妃鐵馬`,425,y1+53);
+  // 主文
+  const y2=y1+(fmt==='story'?230:190);
+  if(o.kind==='live'){
+    g2.font='800 50px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText('妃妃現在騎到',70,y2-70);
+    const sz=fitText(g2,o.name,940,128,900);g2.fillStyle=pink;g2.fillText(o.name,70,y2+60);
+    g2.font='600 54px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(`${o.hm} 即時位置`,70,y2+140);
+  }else{
+    g2.font='600 150px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=pink;g2.fillText(fmt2(o.t),62,y2+40);
+    g2.font='900 54px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText('左右經過',540,y2+30);
+    const sz=fitText(g2,o.name,940,108,900);g2.fillStyle=green;g2.fillText(o.name,70,y2+150);
+  }
+  // 小地圖
+  const my=y2+(fmt==='story'?220:190),mh=fmt==='story'?820:430;
+  miniMap(g2,70,my,940,mh,L,o.i);
+  // Q 妃（右下壓在地圖上）
+  if(BIKE.complete&&BIKE.naturalWidth){const qh=fmt==='story'?470:400,qw=qh*BIKE.naturalWidth/BIKE.naturalHeight;g2.drawImage(BIKE,W-qw-40,my+mh-qh+70,qw,qh);}
+  // 呼籲
+  const y3=my+mh+(fmt==='story'?120:90);
+  g2.font='900 58px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText(o.kind==='live'?'快來路邊幫妃妃加油！':'我在這裡等妃妃！一起來 🙌',70,y3);
+  g2.font='700 34px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#6b6f63';
+  g2.fillText(o.kind==='live'?'即時位置與路線都在這裡 →':'⏰ 預估時間會有誤差，請提早 10 分鐘到路邊等待',70,y3+62);
+  g2.font='600 36px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(SITE_URL.replace('https://',''),70,y3+(o.kind==='live'?120:118));
+  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('支持者自製・非官方',70,H-40);
+  return c;
+}
+function fmt2(m){return fmt(m);}
+function openCard(o){CARD=o;renderCard();$('sheet').hidden=false;$('doShare').focus();}
+function renderCard(){const c=drawCard(CARD,FMT);CARD.canvas=c;$('cardImg').src=c.toDataURL('image/jpeg',0.9);
+  $('fPost').setAttribute('aria-pressed',FMT==='post');$('fStory').setAttribute('aria-pressed',FMT==='story');}
+$('fPost').onclick=()=>{FMT='post';renderCard();};$('fStory').onclick=()=>{FMT='story';renderCard();};
+$('closeSheet').onclick=()=>{$('sheet').hidden=true;};
+$('sheet').addEventListener('click',e=>{if(e.target.id==='sheet')$('sheet').hidden=true;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('sheet').hidden=true;});
+function cardBlob(){return new Promise(r=>CARD.canvas.toBlob(r,'image/jpeg',0.92));}
+const cardText=()=>CARD.kind==='live'?`妃妃現在騎到 ${CARD.name}！快來路邊加油 ${SITE_URL}`:`妃妃鐵馬 ${dateLabel()} 約 ${fmt(CARD.t)} 經過 ${CARD.name}，我在這裡等！一起來 ${SITE_URL}`;
+$('doShare').onclick=async()=>{
+  const b=await cardBlob(),f=new File([b],'妃妃鐵馬.jpg',{type:'image/jpeg'});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:cardText()});return;}
+      if(navigator.share){await navigator.share({text:cardText(),url:SITE_URL});return;}}catch(e){if(e.name==='AbortError')return;}
+  $('doSave').click();
+};
+$('doSave').onclick=async()=>{const b=await cardBlob(),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='妃妃鐵馬.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);};
+$('shareLive').onclick=()=>{if(LIVE.mode!=='live')return;openCard({kind:'live',leg:LIVE.k,i:LIVE.i,name:LIVE.where||APP.legs[LIVE.k].district,hm:LIVE.hm});};
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
 new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 </script>
