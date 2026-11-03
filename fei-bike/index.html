@@ -129,7 +129,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
         <div class="row"><input id="q" list="streets" placeholder="例如：民權南路" autocomplete="off"><button id="go">查</button></div>
         <datalist id="streets"></datalist>
         <div class="answer" id="ans" hidden></div>
-        <p class="hint">時間是用時速 10 公里、拜廟停 15 分鐘推算的，現場可能早或晚半小時，出門前請看即時位置。</p>
+        <p class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。時間是用時速 10 公里、拜廟停 15 分鐘推算的，出門前再看一下即時位置。</p>
       </section>
       <section class="card">
         <h2>停靠的廟</h2>
@@ -276,7 +276,7 @@ function ask(name){
   // 時間上 5 分鐘內的段落合併，同一分鐘不寫區間
   const tr=[];runs.forEach(r=>{const a=L.T[r[0]],b=L.T[r[1]];const l=tr[tr.length-1];if(l&&a-l[1]<5)l[1]=b;else tr.push([a,b]);});
   const dl=LIVE.delay??0; const txt=tr.slice(0,4).map(([a,b])=>[a+dl,b+dl]).map(([a,b])=>`<strong>${fmt(a)}</strong>${b-a>=2?`到 ${fmt(b)} `:''}`).join('、')+(tr.length>4?' 等':'');
-  show(`預計 ${txt}經過「${name}」${delayNote()}<br><span class="hint">早晚可能差半小時，出門前看即時位置。</span>`);
+  show(`預計 ${txt}經過「${name}」${delayNote()}<br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span>`);
   zoomTo(G.slice(runs[0][0],runs[0][1]+1));setProg(runs[0][0]/(G.length-1));}
 function show(h){const a=$('ans');a.innerHTML=h;a.hidden=false;}
 function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]=Math.min(a[0],q[0]);a[1]=Math.min(a[1],q[1]);a[2]=Math.max(a[2],q[0]);a[3]=Math.max(a[3],q[1]);});
@@ -284,7 +284,7 @@ function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]
 function askPoint(p){const L=leg(),G=L.geom;let bi=0,bd=1e12;G.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;bi=i;}});
   pin={p,q:G[bi]};hl=null;
   if(bd>1500){show(`這裡離${L.district}路線約 ${(bd/1000).toFixed(1)} 公里，今天這段應該騎不到附近。`);}
-  else show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}`);
+  else show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}<br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span>`);
   setProg(bi/(G.length-1));}
 
 // 拖曳、縮放、雙指
@@ -333,8 +333,9 @@ async function pollLive(){
     const bar=$('livebar');bar.hidden=false;
     if(iso!==APP.date||/停止/.test(d.gpsType||'')){LIVE.delay=null;bar.innerHTML=`即時定位：${/停止/.test(d.gpsType||'')?'還沒開始發送':'今天還沒出發'}`;draw();return;}
     // 找最近的那一段路線，比預估時間
-    let best=null;APP.legs.forEach((L,k)=>L.geom.forEach((q,i)=>{const dd=dist(cur,q);if(!best||dd<best.d)best={k,i,d:dd};}));
-    if(best&&best.d<400){LIVE.delay=hm-APP.legs[best.k].T[best.i];if(!LIVE.switched){LIVE.switched=1;if(best.k!==LEG)selectLeg(best.k);if(!playing)setProg(best.i/(APP.legs[best.k].geom.length-1));}
+    // 距離＋時間一起看：起點終點同一座廟時才不會對錯
+    let best=null;APP.legs.forEach((L,k)=>L.geom.forEach((q,i)=>{const dd=dist(cur,q),sc=dd+8*Math.abs(L.T[i]-hm);if(!best||sc<best.sc)best={k,i,d:dd,sc};}));
+    if(best&&best.d<400){LIVE.delay=hm-APP.legs[best.k].T[best.i];if(hm<+APP.legs[best.k].start.slice(0,2)*60+ +APP.legs[best.k].start.slice(3,5)&&best.i<APP.legs[best.k].geom.length*0.1)LIVE.delay=0;if(!LIVE.switched){LIVE.switched=1;if(best.k!==LEG)selectLeg(best.k);if(!playing)setProg(best.i/(APP.legs[best.k].geom.length-1));}
       bar.innerHTML=`即時 ${t.slice(11,16)}・${d.addr?d.addr.replace(/^臺南市..區/,'').replace(/\d.*$/,''):''}・<b>${Math.abs(Math.round(LIVE.delay))<3?'準時':`${LIVE.delay>0?'晚':'早'} ${Math.abs(Math.round(LIVE.delay))} 分`}</b>`;}
     else{LIVE.delay=null;bar.innerHTML=`即時 ${t.slice(11,16)}・${d.addr||''}（不在預定路線上）`;}
     draw();

@@ -148,7 +148,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
         <div class="row"><input id="q" list="streets" placeholder="例如：民權南路" autocomplete="off"><button id="go">查</button></div>
         <datalist id="streets"></datalist>
         <div class="answer" id="ans" hidden></div>
-        <p class="hint">時間是用時速 10 公里、拜廟停 15 分鐘推算的，現場可能早或晚半小時，出門前請看即時位置。</p>
+        <p class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。時間是用時速 10 公里、拜廟停 15 分鐘推算的，出門前再看一下即時位置。</p>
       </section>
       <section class="card">
         <h2>停靠的廟</h2>
@@ -300,7 +300,7 @@ function ask(name){
   // 時間上 5 分鐘內的段落合併，同一分鐘不寫區間
   const tr=[];runs.forEach(r=>{const a=L.T[r[0]],b=L.T[r[1]];const l=tr[tr.length-1];if(l&&a-l[1]<5)l[1]=b;else tr.push([a,b]);});
   const dl=LIVE.delay??0; const txt=tr.slice(0,4).map(([a,b])=>[a+dl,b+dl]).map(([a,b])=>`<strong>${fmt(a)}</strong>${b-a>=2?`到 ${fmt(b)} `:''}`).join('、')+(tr.length>4?' 等':'');
-  show(`預計 ${txt}經過「${name}」${delayNote()}<br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button><br><span class="hint">早晚可能差半小時，出門前看即時位置。</span>`);
+  show(`預計 ${txt}經過「${name}」${delayNote()}<br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button><br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span>`);
   $('saveHome').onclick=()=>saveHome({leg:LEG,i:runs[0][0],name});
   zoomTo(G.slice(runs[0][0],runs[0][1]+1));setProg(runs[0][0]/(G.length-1));}
 function show(h){const a=$('ans');a.innerHTML=h;a.hidden=false;}
@@ -309,7 +309,7 @@ function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]
 function askPoint(p){const L=leg(),G=L.geom;let bi=0,bd=1e12;G.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;bi=i;}});
   pin={p,q:G[bi]};hl=null;
   if(bd>1500){show(`這裡離${L.district}路線約 ${(bd/1000).toFixed(1)} 公里，今天這段應該騎不到附近。`);}
-  else{show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}<br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button>`);
+  else{show(`最近的路線點在 ${Math.round(bd/10)*10} 公尺外，預計 <strong>${fmt(L.T[bi]+(LIVE.delay??0))}</strong>前後經過${delayNote()}<br><span class="hint">⏰ 預估時間會有誤差，請提早 10 分鐘到路線上等待。</span><br><button class="save" id="saveHome">📍 設成我家，車隊快到時提醒我</button>`);
     $('saveHome').onclick=()=>saveHome({leg:LEG,i:bi,name:'你標的位置'});}
   setProg(bi/(G.length-1));}
 
@@ -374,7 +374,7 @@ function homeChip(){
   if(LIVE.mode==='live'&&LIVE.k===HOME.leg){
     if(LIVE.i>=HOME.i+3){el.textContent=`🏠 妃妃已經過你家（${HOME.name}）`;return;}
     const left=Math.max(0,Math.round(eta-nowMin()));el.textContent=left<=1?`🏠 妃妃快到你家了！`:`🏠 還有約 ${left} 分鐘到你家`;if(left<=10)el.classList.add('soon');return;}
-  el.textContent=`🏠 你家（${HOME.name}）預計 ${fmt(eta)}`;
+  el.textContent=`🏠 你家（${HOME.name}）預計 ${fmt(eta)}・請提早 10 分鐘等`;
 }
 // 停下來偵測：最近 3 分鐘都在 60 公尺內
 function stopNote(){
