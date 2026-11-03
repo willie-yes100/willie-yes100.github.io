@@ -406,7 +406,8 @@ async function pollLive(){
   // 騎乘中（5 分鐘內有更新）或訊號暫時中斷（5–30 分鐘）
   gp.forEach(p=>{const l=LIVE.pts[LIVE.pts.length-1];if(!l||dist(l,p)>5)LIVE.pts.push(p);});if(LIVE.pts.length>4000)LIVE.pts.splice(0,LIVE.pts.length-4000);
   if(!LIVE.hist.length||LIVE.hist[LIVE.hist.length-1].t!==gm)LIVE.hist.push({t:gm,p:cur});if(LIVE.hist.length>60)LIVE.hist.shift();
-  let best=null;APP.legs.forEach((L,k)=>L.geom.forEach((q,i)=>{const dd=dist(cur,q);if(!best||dd<best.d)best={k,i,d:dd};}));
+  // 對到路線上：距離＋時間一起看（起點和終點是同一座廟時，才不會把出發前對成快到終點）；時間差 1 分鐘算 8 公尺
+  let best=null;APP.legs.forEach((L,k)=>L.geom.forEach((q,i)=>{const dd=dist(cur,q),sc=dd+8*Math.abs(L.T[i]-gm);if(!best||sc<best.sc)best={k,i,d:dd,sc};}));
   const where=(d.addr||'').replace(/^臺南市..區/,'').replace(/\d.*$/,'');
   if(!best||best.d>400){LIVE.mode='off';LIVE.delay=null;setBar(`即時 ${t.slice(11,16)}・${where}（不在預定路線上）`);draw();return;}
   const was=LIVE.mode;LIVE.mode='live';LIVE.k=best.k;LIVE.i=best.i;LIVE.delay=gm-APP.legs[best.k].T[best.i];
@@ -418,6 +419,9 @@ async function pollLive(){
   // 跑馬燈時間加上延遲
   [...$('tick').children].forEach((li,k)=>{const x=leg().segs[k];if(x)li.querySelector('time').textContent=fmt(x.t+(LIVE.k===LEG?LIVE.delay:0));});
   districtCheck(cur);
+  // 還沒到出發時間、人在起點附近：顯示準備出發，不算早到
+  const L0=APP.legs[LIVE.k], st0=hm2m(L0.start);
+  if(gm<st0&&best.i<L0.geom.length*0.1){LIVE.delay=0;setBar(`即時 ${t.slice(11,16)}・在${L0.stops[0]?.name||where}準備出發（${L0.start} 出發）`);if(Date.now()-userAt>20000){$('clk').textContent=t.slice(11,16);$('clkSub').textContent='即時位置・準備出發';}homeChip();draw();return;}
   const dl=Math.round(LIVE.delay), st=stopNote();
   const lag=Math.abs(dl)<3?'準時':`${dl>0?'晚':'早'} ${Math.abs(dl)} 分`;
   setBar(age>5?`訊號中斷 ${Math.round(age)} 分鐘・最後在${where}`:`即時 ${t.slice(11,16)}・${st||where}・<b>${lag}</b>`);
