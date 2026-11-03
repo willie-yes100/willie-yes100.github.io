@@ -85,9 +85,11 @@ input[type=text]:focus-visible,.btn:focus-visible,.stg:focus-visible{outline:3px
       <h1>妃妃鐵馬<em>應援大作戰</em></h1>
       <p>妃妃騎鐵馬經過，路邊的鄰居都出來加油了！跟著節奏和大家擊掌，收集最多應援愛心。</p>
       <div class="how">
-        <div><b>鄰居走到圈圈時，點畫面一下跟他擊掌！</b></div>
-        <div class="hint">中途有全力衝刺，天上飄過星星和大愛心要點它！選「挑戰」要分上排、下排點。</div>
+        <div><b id="howMain">鄰居走到圈圈時，點畫面一下跟他擊掌！</b></div>
+        <div class="hint" id="howHint">中途有全力衝刺，天上飄過星星和大愛心要點它！選「挑戰」要分上排、下排點。</div>
       </div>
+      <h2>玩法</h2>
+      <div class="row" id="games"><button type="button" class="stg" data-g="ride" aria-pressed="true" style="flex:1"><span>騎鐵馬應援</span><small>60 秒・跟著節奏擊掌</small></button><button type="button" class="stg" data-g="win" aria-pressed="false" style="flex:1"><span>窗口應援</span><small>30 秒・鄰居探頭快點他</small></button></div>
       <h2>我是哪一區人</h2>
       <div class="row"><select id="home" aria-label="選你的家鄉區"></select></div>
       <p class="hint" style="margin-top:-4px">你收到的應援會加進家鄉區，一起衝「37 區最熱情」排行。​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​</p>
@@ -152,7 +154,7 @@ const C={green:'#1f5c3a',green2:'#2f7a50',pink:'#e0336f',gold:'#f2b632',cream:'#
 const SHIRT=['#2f7a50','#e0336f','#f2b632','#3b6fb6','#ffffff','#7a4fb3','#e86f2c','#1f5c3a'];
 const HAIR=['#2a211c','#3b2f2a','#d9d4cc','#5a4030','#1b1b1b'];
 const SKIN=['#f2d0b1','#e8bf9c','#d9a982','#f5dcc4'];
-const BPM=120,B=60/BPM,LEAD=3,DUR=60;let PERF=.1,GOOD=.2,APPROACH=2.3;
+const BPM=120,B=60/BPM,LEAD=3;let DUR=60,gameType='ride';let PERF=.1,GOOD=.2,APPROACH=2.3;
 // 難度：輕鬆＝判定寬、民眾走得慢、只在拍點上出現；挑戰＝原本的版本
 const MODES={easy:{name:'輕鬆',perf:.1,good:.2,approach:2.3},hard:{name:'挑戰',perf:.06,good:.13,approach:1.7}};let mode='easy';
 const EASY_PATS=[[[[0,'one']],[[0,'one'],[2,'one']]],[[[0,'one'],[2,'one']],[[0,'big'],[2,'one']],[[0,'one'],[1,'one'],[2,'one']]],
@@ -220,10 +222,10 @@ const fx={pops:[],flies:[],rings:[0,0],pulse:0,glowT:0};
 function now(){return ac?ac.currentTime-songAc:performance.now()/1000-perf0;}
 const tier=()=>combo>=50?3:combo>=30?2:combo>=10?1:0;
 const TIER_COL=[C.pink,'#ff4f7e',C.gold,'#ffd34d'];
-function start(){const M=MODES[mode];PERF=M.perf;GOOD=M.good;APPROACH=M.approach;SPX=(W*1.08-HX)/APPROACH;initAudio();if(ac&&ac.state==='suspended')ac.resume();
+function start(){DUR=gameType==='win'?30:60;const M=MODES[mode];PERF=M.perf;GOOD=M.good;APPROACH=M.approach;SPX=(W*1.08-HX)/APPROACH;initAudio();if(ac&&ac.state==='suspended')ac.resume();
   notes=makeChart(stage.seed).filter(n=>!(n.t>SP0-1.2&&n.t<SP1+1)&&!(n.kind==='roll'&&n.end>SP0-1.2&&n.t<SP1+1));
   {const one=notes.filter(n=>n.kind==='one');const pick=[one.find(n=>n.t>14&&n.t<SP0-2),one.find(n=>n.t>SP1+6)];pick.forEach((n,i)=>{if(n)n.tr=stage.treasure[i%stage.treasure.length];});}
-  sp={on:false,done:false,v:0,max:0,taps:0,last:0,lastSide:-1,d:0};items=ITEMS.map(o=>({...o,caught:false}));starUntil=0;treas=[];caughtH=0;lastAuto=0;hearts=combo=maxCombo=nP=nG=nM=gauge=shown=0;fever=false;feverEnd=0;fx.pops=[];fx.flies=[];
+  sp={on:false,done:gameType==='win',v:0,max:0,taps:0,last:0,lastSide:-1,d:0};if(gameType==='win'){notes=[];items=[];win={pops:[],next:0,spawned:0,gold:0};}items=ITEMS.map(o=>({...o,caught:false}));starUntil=0;treas=[];caughtH=0;lastAuto=0;hearts=combo=maxCombo=nP=nG=nM=gauge=shown=0;fever=false;feverEnd=0;fx.pops=[];fx.flies=[];
   songAc=ac?ac.currentTime+LEAD:0;perf0=performance.now()/1000+LEAD;nextStep=0;
   document.getElementById('startOv').hidden=true;document.getElementById('endOv').hidden=true;document.getElementById('mute').hidden=!ac;
   state='play';requestAnimationFrame(loop);}
@@ -247,7 +249,7 @@ function tap(side){if(state!=='play')return;const t=now(),any=mode==='easy';
   if(combo===10||combo===30||combo===50){popText(combo+' 連擊！愛心更亮了',TIER_COL[tier()],W/2,H*.3,22);fx.glowT=performance.now();}
   sfx(p?'p':'g');checkFever(t);}
 function checkFever(t){if(!fever&&gauge>=100){fever=true;feverEnd=t+8;popText('全城應援！愛心加倍',C.gold,W/2,H*.36,28);sfx('fever');}}
-function update(t){
+function update(t){if(gameType==='win')winUpdate(t);
   if(!sp.on&&!sp.done&&t>=SP0){sp.on=true;sp.last=t;sfx('fever');}
   if(sp.on){const dt=Math.max(0,t-sp.last);sp.last=t;sp.v=Math.max(0,sp.v-dt*16);sp.d+=sp.v*dt*.05;
     if(t>=SP1){sp.on=false;sp.done=true;const bonus=Math.round(sp.max*5)*(fever?2:1);flyHearts(6,W/2,H*.5,bonus);
@@ -381,7 +383,7 @@ function effects(){const nowp=performance.now(),tx=38,ty=8+33;
     g.lineWidth=6;g.strokeStyle='rgba(255,253,248,.95)';g.strokeText(p.txt,p.x,p.y-k*26);g.fillStyle=p.col;g.fillText(p.txt,p.x,p.y-k*26);g.restore();return true;});}
 function countdown(t){if(t>=0)return;const n=Math.ceil(-t);g.save();g.textAlign='center';g.font='800 90px Rubik, sans-serif';g.lineWidth=10;g.strokeStyle='rgba(255,253,248,.95)';
   g.strokeText(n,W/2,H*.4);g.fillStyle=C.pink;g.fillText(n,W/2,H*.4);g.font=`900 18px ${font()}`;g.fillStyle=C.ink;g.strokeText('準備擊掌！',W/2,H*.4+40);g.fillText('準備擊掌！',W/2,H*.4+40);g.restore();}
-function draw(t){if(sp.on&&state==='play'){drawSprint(t);effects();hud(t);return;}drawScene(t);
+function draw(t){if(gameType==='win'){drawWin(t);effects();if(state==='play'){hud(t);countdown(t);}return;}if(sp.on&&state==='play'){drawSprint(t);effects();hud(t);return;}drawScene(t);
   const row=sd=>{for(const n of notes){if(n.side!==sd)continue;if(n.kind==='roll')roll(n,t);}for(let i=notes.length-1;i>=0;i--){const n=notes[i];if(n.side===sd&&n.kind!=='roll')supporter(n,t);}};
   row(0);rider(t);row(1);if(state==='play')drawItems(t);
   effects();if(state==='play'){hud(t);countdown(t);}}
@@ -488,11 +490,67 @@ function catchAt(x,y){const t=now();for(const it of items){if(it.caught||t<it.t|
 function catchItem(it,x,y,t){it.caught=true;
   if(it.k==='heart'){const add=100*(fever?2:1);caughtH++;flyHearts(5,x,y+30,add);popText(`隱藏大愛心 +${add}`,C.pink,W/2,H*.3,26);sfx('fever');}
   else{starUntil=t+6;gauge=Math.min(100,gauge+25);popText('無敵星星！6 秒自動擊掌',C.gold,W/2,H*.3,24);sfx('fever');checkFever(t);}}
+
+// ───────── 窗口應援：騎樓正面，鄰居從窗口、門口探頭，越來越快 ─────────
+let win={pops:[],next:0,spawned:0,gold:0};
+function slotRect(i){const c=i%3,r=Math.floor(i/3),cw=W/3,x=c*cw+cw*.15,w=cw*.7;
+  return r<2?{x,y:H*(.225+r*.2),w,h:H*.14,door:false}:{x:c*cw+cw*.1,y:H*.7,w:cw*.8,h:H*.2,door:true};}
+function winUpdate(t){if(t<0)return;const k=Math.min(1,t/DUR),hard=mode==='hard'?.8:1;
+  win.pops=win.pops.filter(p=>{if(t<p.t0+p.dur)return true;if(p.kind==='fan'&&!p.hit&&combo>0)combo=0;return false;});
+  if(t>=win.next&&win.pops.length<4){const busy=new Set(win.pops.map(p=>p.slot)),free=[...Array(9).keys()].filter(i=>!busy.has(i));
+    if(free.length){const slot=free[Math.floor(Math.random()*free.length)],r=Math.random();
+      let kind=r<.1?'cat':r<.2?'quilt':r<.26?'treasure':'fan';if(kind==='fan'&&win.gold<3&&t>6&&Math.random()<.05)kind='gold';
+      const dur=(1.5-.85*k)*hard*(kind==='gold'?.75:1);win.pops.push({slot,kind,t0:t,dur,id:Math.floor(Math.random()*1e6),tr:stage.treasure[Math.floor(Math.random()*stage.treasure.length)]});
+      if(kind==='fan'||kind==='gold'||kind==='treasure')win.spawned++;}
+    win.next=t+(.95-.6*k)*hard;}}
+function winTap(x,y){const t=now();if(t<0)return;
+  for(const p of win.pops){if(p.hit)continue;const R=slotRect(p.slot);if(x<R.x-8||x>R.x+R.w+8||y<R.y-30||y>R.y+R.h+8)continue;
+    if(t-p.t0<.08)continue;p.hit=true;p.dur=Math.min(p.dur,t-p.t0+.25);
+    if(p.kind==='cat'||p.kind==='quilt'){combo=0;popText(p.kind==='cat'?'貓咪在睡午覺～':'棉被在曬太陽～',C.muted,R.x+R.w/2,R.y,18);sfx('g');return;}
+    combo++;maxCombo=Math.max(maxCombo,combo);nP++;
+    const base=p.kind==='gold'?50:p.kind==='treasure'?30:10,add=(base+[0,2,4,6][tier()])*(fever?2:1);
+    if(p.kind==='gold')win.gold++;if(p.kind==='treasure')treas.push(p.tr);
+    flyHearts(p.kind==='fan'?1:3,R.x+R.w/2,R.y+R.h/2,add);gauge=Math.min(100,gauge+5);
+    popText(p.kind==='gold'?'妃妃本人！+'+add:p.kind==='treasure'?`在地寶物「${p.tr}」+${add}`:'讚！',p.kind==='fan'?C.pink:C.gold,R.x+R.w/2,R.y-6,p.kind==='fan'?24:22);
+    if(combo===10||combo===30||combo===50){popText(combo+' 連擊！愛心更亮了',TIER_COL[tier()],W/2,H*.2,22);}
+    sfx(p.kind==='fan'?'g':'p');checkFever(t);return;}}
+function drawWin(t){const S=stage.look,gr=g.createLinearGradient(0,0,0,H*.2);gr.addColorStop(0,S.sky0);gr.addColorStop(1,S.sky1);g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const cw=W/3,top=H*.17;
+  for(let c=0;c<3;c++){const r=rng(c*31+stage.seed),col=S.walls[(c+stage.seed)%S.walls.length],x=c*cw,ht=top-H*.02*r();
+    g.fillStyle=col;g.fillRect(x,ht,cw+1,H-ht);g.fillStyle=shade(col,-.35);g.fillRect(x,ht-6,cw+1,8);g.fillStyle=shade(col,-.15);g.fillRect(x+cw-3,ht,3,H-ht);
+    // 騎樓：一樓陰影、柱子
+    g.fillStyle='rgba(40,30,20,.4)';g.fillRect(x,H*.66,cw,H*.34);g.fillStyle=shade(col,.1);g.fillRect(x+2,H*.66,cw*.08,H*.34);
+    g.fillStyle=shade(col,-.12);g.fillRect(x,H*.655,cw,8);
+    // 招牌
+    const sc=S.signs[c%S.signs.length],txt=stage.signs[(c*2+stage.seed)%stage.signs.length];g.fillStyle=sc;rr(x+cw*.12,H*.6,cw*.76,H*.036,4);g.fill();
+    g.fillStyle='#fff8e6';g.font=`900 ${H*.024}px ${font()}`;g.textAlign='center';g.fillText(txt,x+cw/2,H*.626);}
+  g.fillStyle=S.walk;g.fillRect(0,H*.93,W,H*.07);
+  for(let i=0;i<9;i++){const R=slotRect(i);
+    if(R.door){g.fillStyle='#2e2a26';rr(R.x,R.y,R.w,R.h,6);g.fill();g.fillStyle='rgba(255,230,170,.18)';g.fillRect(R.x+4,R.y+4,R.w-8,R.h*.3);}
+    else{g.fillStyle='#f1e6cf';g.fillRect(R.x-5,R.y-5,R.w+10,R.h+10);g.fillStyle='#3a4a52';g.fillRect(R.x,R.y,R.w,R.h);g.fillStyle='rgba(255,255,255,.12)';g.fillRect(R.x,R.y,R.w,R.h*.18);
+      g.fillStyle=shade('#f1e6cf',-.2);g.fillRect(R.x-8,R.y+R.h+4,R.w+16,6);}}
+  for(const p of win.pops){const R=slotRect(p.slot),age=t-p.t0,inn=Math.min(1,age/.15),out=Math.min(1,Math.max(0,(p.t0+p.dur-t)/.15)),k=Math.min(inn,out),e=k*k*(3-2*k);
+    g.save();g.beginPath();g.rect(R.x,R.y-40,R.w,R.h+40);g.clip();
+    const s=R.w/48,bx=R.x+R.w/2,by=R.y+R.h+50*s*(1-e)+(R.door?-4:14*s);
+    if(p.kind==='cat'){const cy=R.y+R.h-R.h*.3*e+R.h*.05;g.fillStyle='#e8a050';g.beginPath();g.ellipse(bx,cy,R.w*.3,R.h*.17,0,0,7);g.fill();g.beginPath();g.arc(bx+R.w*.22,cy-R.h*.08,R.h*.13,0,7);g.fill();
+      g.beginPath();g.moveTo(bx+R.w*.15,cy-R.h*.17);g.lineTo(bx+R.w*.18,cy-R.h*.3);g.lineTo(bx+R.w*.23,cy-R.h*.2);g.moveTo(bx+R.w*.25,cy-R.h*.2);g.lineTo(bx+R.w*.3,cy-R.h*.3);g.lineTo(bx+R.w*.32,cy-R.h*.16);g.fill();
+      g.strokeStyle='#5a3a1a';g.lineWidth=2;for(const dx of[.18,.27]){g.beginPath();g.arc(bx+R.w*dx,cy-R.h*.09,R.h*.025,0,Math.PI);g.stroke();}
+      g.fillStyle='#fff';g.font=`900 ${R.h*.16}px ${font()}`;g.textAlign='center';g.fillText('Zzz',bx-R.w*.15,cy-R.h*.2);}
+    else if(p.kind==='quilt'){const qh=R.h*.8*e;g.fillStyle='#d8322b';g.fillRect(R.x+R.w*.08,R.y,R.w*.84,qh);g.fillStyle='#f2b632';for(let i=0;i<4;i++)for(let j=0;j<3;j++){const fx2=R.x+R.w*(.2+i*.2),fy=R.y+qh-R.h*(.12+j*.25);if(fy>R.y){g.beginPath();g.arc(fx2,fy,R.h*.05,0,7);g.fill();}}
+      g.fillStyle='#1f5c3a';g.fillRect(R.x+R.w*.08,R.y+qh-5,R.w*.84,5);}
+    else if(p.kind==='gold'){const hs=Math.min(R.w,R.h)*.9,hy=R.y+R.h*.5+R.h*(1-e);g.save();g.shadowColor=C.gold;g.shadowBlur=26;g.beginPath();g.arc(bx,hy,hs*.55,0,7);g.fillStyle='rgba(255,211,77,.95)';g.fill();g.restore();
+      if(HEAD.complete&&HEAD.naturalWidth)g.drawImage(HEAD,bx-hs/2,hy-hs/2,hs,hs);}
+    else person(bx,by,p.id,true,s*1.25);
+    g.restore();
+    if(e>.6&&!p.hit&&p.kind!=='cat'&&p.kind!=='quilt'){const txt=p.kind==='gold'?'妃妃本人':p.kind==='treasure'?p.tr:'妃妃加油',pw=(txt.length*15+18),py=R.y-14;
+      g.save();g.globalAlpha=(e-.6)/.4;g.fillStyle=p.kind==='fan'?C.pink:C.gold;if(p.kind!=='fan'){g.shadowColor=C.gold;g.shadowBlur=12;}rr(bx-pw/2,py-14,pw,26,7);g.fill();g.shadowBlur=0;
+      g.fillStyle=p.kind==='fan'?'#fff':C.ink;g.font=`900 15px ${font()}`;g.textAlign='center';g.fillText(txt,bx,py+5);g.restore();}}}
 function loop(){if(state!=='play')return;const t=now();schedule();update(t);draw(t);requestAnimationFrame(loop);}
 
 
 // ───────── 輸入 ─────────
 cv.addEventListener('pointerdown',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(state!=='play')return;
+  if(gameType==='win'){winTap(x,y);return;}
   if(sp.on){sprintTap(x<r.width/2?0:1);return;}if(catchAt(x,y))return;tap(y<(UY+LY)/2?0:1);});
 addEventListener('keydown',e=>{if(state!=='play'||e.repeat)return;const k=e.key.toLowerCase();
   if(k===' '){catchAt(null,null);e.preventDefault();return;}
@@ -502,7 +560,7 @@ document.getElementById('mute').onclick=e=>{muted=!muted;e.target.textContent='�
 // ───────── 結算 ─────────
 const TITLES=[[.9,'全城沸騰！應援王'],[.75,'人氣滿點'],[.55,'熱情鄰居'],[0,'暖身完成，再騎一次']];
 function finish(){state='end';hearts+=fx.flies.reduce((a,f)=>a+f.gain,0);fx.flies=[];
-  const total=notes.filter(n=>n.kind!=='roll').length,acc=(nP+nG*.5)/total;
+  const total=gameType==='win'?Math.max(1,win.spawned):notes.filter(n=>n.kind!=='roll').length,acc=(nP+nG*.5)/total;
   document.getElementById('endStage').textContent=`${stage.when}・${stage.name}`;
   document.getElementById('endTitle').textContent=TITLES.find(([k])=>acc>=k)[1];
   document.getElementById('endHearts').textContent=hearts.toLocaleString();
@@ -511,7 +569,7 @@ function finish(){state='end';hearts+=fx.flies.reduce((a,f)=>a+f.gain,0);fx.flie
   document.getElementById('endOv').hidden=false;document.getElementById('mute').hidden=true;drawConvoy(bikes);
   try{const b=JSON.parse(localStorage.getItem('feiBest')||'{}');if(!(b[stage.id]>=hearts)){b[stage.id]=hearts;localStorage.setItem('feiBest',JSON.stringify(b));}}catch(e){}
   document.getElementById('saveMsg').textContent='';document.getElementById('save').disabled=false;
-  const tl=[...new Set(treas)];document.getElementById('bonusLine').textContent=`衝刺最高時速 ${Math.round(sp.max||0)} 公里・隱藏大愛心 ${caughtH} 顆`+(tl.length?`・收集到在地寶物：${tl.join('、')}`:'');
+  const tl=[...new Set(treas)];document.getElementById('bonusLine').textContent=gameType==='win'?`點到妃妃本人 ${win.gold} 次`+(tl.length?`・收集到在地寶物：${tl.join('、')}`:''):`衝刺最高時速 ${Math.round(sp.max||0)} 公里・隱藏大愛心 ${caughtH} 顆`+(tl.length?`・收集到在地寶物：${tl.join('、')}`:'');
   renderBoard('board');addToHome();}
 function drawConvoy(n){const c=document.getElementById('convoy'),x=c.getContext('2d'),w=c.clientWidth,h=c.clientHeight,d=Math.min(2,devicePixelRatio||1);c.width=w*d;c.height=h*d;x.setTransform(d,0,0,d,0,0);
   x.fillStyle=C.cream;x.fillRect(0,0,w,h);x.fillStyle=C.road;x.fillRect(0,h-22,w,22);
@@ -542,7 +600,7 @@ async function addToHome(){const line=document.getElementById('homeLine');
     try{await db.doc('scores/'+me).set(nd);BOARD[me]=nd;}catch(e){canWrite=false;}}
   const L=distTotals(),rk=L.findIndex(([d])=>d===home);
   line.textContent=`你幫${home}加了 ${hearts.toLocaleString()} 份應援`+(rk>=0?`，${home}目前 37 區第 ${rk+1} 名！`:'！');renderDist('distBoardEnd',5);}
-const bkey=()=>'h_'+stage.id+(mode==='hard'?'_hard':'');
+const bkey=()=>'h_'+stage.id+(gameType==='win'?'_win':'')+(mode==='hard'?'_hard':'');
 function topList(){return Object.entries(BOARD).map(([id,v])=>({id,name:String(v.name||'無名鄰居').slice(0,10),h:+(v[bkey()]||0)})).filter(x=>x.h>0).sort((a,b)=>b.h-a.h);}
 function renderBoard(el,limit=20){const box=document.getElementById(el);box.textContent='';
   const list=topList().slice(0,limit);
@@ -571,6 +629,11 @@ STAGES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';
   b.onclick=()=>{stage=s;[...stBox.children].forEach(x=>x.setAttribute('aria-pressed',x===b));renderBoard('startBoard',5);draw(-LEAD);};stBox.appendChild(b);});
 document.getElementById('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;mode=b.dataset.m;[...b.parentNode.children].forEach(x=>x.setAttribute('aria-pressed',x===b));renderBoard('startBoard',5);};
 document.getElementById('go').onclick=start;
+document.getElementById('games').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;gameType=b.dataset.g;[...b.parentNode.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const w=gameType==='win';document.getElementById('go').textContent=w?'開始！30 秒':'出發！60 秒';
+  document.getElementById('howMain').textContent=w?'鄰居從窗口、門口探頭舉牌，快點他！':'鄰居走到圈圈時，點畫面一下跟他擊掌！';
+  document.getElementById('howHint').textContent=w?'睡午覺的貓和曬太陽的棉被不要點；金色的妃妃本人加 50！越後面冒得越快。':'中途有全力衝刺，天上飄過星星和大愛心要點它！選「挑戰」要分上排、下排點。';
+  renderBoard('startBoard',5);draw(-LEAD);};
 document.getElementById('again').onclick=start;
 document.getElementById('back').onclick=()=>{state='menu';document.getElementById('endOv').hidden=true;document.getElementById('startOv').hidden=false;renderBoard('startBoard',5);draw(-LEAD);};
 resize();FEI.onload=()=>{if(state!=='play')draw(-LEAD);};document.fonts&&document.fonts.ready.then(()=>{if(state!=='play')draw(-LEAD);});draw(-LEAD);
