@@ -22,7 +22,7 @@
   --k-596573:100;
   --paper:#f7f3ea; --panel:#fffdf9; --ink:#1d2a22; --muted:#6b6f63; --line:#e4dccb;
   --green:#1d5a38; --green-soft:#b5d3be; --pink:#d81e5b; --pink-soft:#f9d7e2;
-  --street:#d9d1bf; --purple:#7b6fc5; --street-major:#c6bba4; --district:#9a8f78; --water:#cfdfe7;
+  --street:#d9d1bf; --street-major:#c6bba3; --district:#9a8f78; --water:#cfdfe6;
   color-scheme:light;
   --display:"Noto Sans TC","PingFang TC","Heiti TC",sans-serif;
   --body:"Noto Sans TC","PingFang TC","Heiti TC",sans-serif;
@@ -362,7 +362,7 @@ function selectLeg(k){LEG=k;pin=null;hl=null;$('ans').hidden=true;
   $('turns').innerHTML=L.turns.map((t,i)=>`<li data-i="${i}"><time>${fmt(t.t)}</time><span>${t.label.replace('→',' → ').replace('（往',' （往')}</span></li>`).join('');
   const names=new Set();L.streets.forEach(s=>s&&!/宮|廟|殿|府/.test(s)&&names.add(s));
   $('streets').innerHTML=[...names].map(n=>`<option value="${n}">`).join('');
-  fit();setProg(dayDone(DAY)?1:0);}
+  fit();setProg(legDone(DAY,LEG)?1:0);stampOverlay();}
 
 // 查路名：在路線上找這條街的段落 → 時間區間
 function ask(name){
@@ -436,9 +436,16 @@ selectLeg(def);dayBar();stampOverlay();}
 function pickDay(){const t=isoOf(new Date()),D=DATA.days;const k=D.findIndex(x=>x.date===t);
   if(k>=0&&(nowHM()<SWITCH||(DAY===k&&LIVE.mode==='live'&&!dayDone(k))))return k;
   const n=D.findIndex(x=>x.date>t);return n>=0?n:(k>=0?k:D.length-1);}
-// 這一天騎完了沒：日期已過；或今天 GPS 到了終點；或過了預估結束 30 分鐘、而且沒有在動
-function dayDone(k){const D=DATA.days[k],t=isoOf(new Date());if(D.date<t)return true;if(D.date>t)return false;
-  if(LIVE.finished===D.date)return true;const end=Math.max(...D.legs.map(L=>L.end));return nowHM()>end+30&&LIVE.mode!=='live';}
+// 一段一段蓋章：日期已過＝騎完；今天要 GPS 證明騎完（到了那段終點，或人已經在下一段）。GPS 中途停掉不算
+const FIN={};   // 日期 → 已騎完的段（索引）
+function legDone(k,j){const D=DATA.days[k],t=isoOf(new Date());if(D.date<t)return true;if(D.date>t)return false;return !!(FIN[D.date]&&FIN[D.date].has(j));}
+function dayDone(k){return DATA.days[k].legs.every((_,j)=>legDone(k,j));}
+function finCheck(iso,gm,cur,isFresh){const k=DATA.days.findIndex(x=>x.date===iso);if(k<0||!cur)return;const D=DATA.days[k],F=FIN[iso]=FIN[iso]||new Set(),n0=F.size;
+  let best=null;D.legs.forEach((L,j)=>L.geom.forEach((q,i)=>{const sc=dist(cur,q)+8*Math.abs(L.T[i]-gm);if(!best||sc<best.sc)best={j,sc,d:dist(cur,q)};}));
+  if(best&&best.d<400&&gm>=hm2m(D.legs[best.j].start)-30)for(let j=0;j<best.j;j++)F.add(j);
+  D.legs.forEach((L,j)=>{const e=L.geom[L.geom.length-1];if(dist(cur,e)<250&&gm>=L.end-60)F.add(j);});
+  if(F.size>n0){selectLegKeep();stampOverlay();renderIfOpen();if(isFresh)party(F.size===D.legs.length?'今天騎完了！':`${D.legs[Math.max(...F)].district}騎完了！`,'鐵馬妃起來・人民當靠3');}}
+function selectLegKeep(){if(!pts.size&&!playing&&LIVE.mode!=='live')setProg(legDone(DAY,LEG)?1:prog);}
 function dayBar(){const D=DATA.days[DAY],pk=pickDay(),t=isoOf(new Date());
   let h=`<b>${dLabel(D.date)} ${D.title}</b>`;
   const L0=D.legs[0];h+=`<span>${L0.gather?L0.gather+' 集合・':''}${L0.start} 出發</span>`;
@@ -446,8 +453,8 @@ function dayBar(){const D=DATA.days[DAY],pk=pickDay(),t=isoOf(new Date());
   if(DAY!==pk)h+=`<button id="backToday">回到${DATA.days[pk].date===t?'今天':'下一場'}行程</button>`;
   if(D.legs.some(L=>(L.pending||[]).length))h+='<span class="pend"><i></i>綠色虛線＝暫估路段，團隊確認後更新</span>';
   $('daybar').innerHTML=h;const b=$('backToday');if(b)b.onclick=()=>{userDay=false;useDay(pickDay());};}
-function stampOverlay(){const el=$('done');if(!dayDone(DAY)){el.hidden=true;return;}const D=DATA.days[DAY];
-  const km=D.legs.reduce((a,L)=>a+L.km,0);el.innerHTML=`<b>妃</b><span>${dLabel(D.date).replace(/（.）/,'')} ${D.title}<br>完成 ${km.toFixed(1)} 公里</span>`;el.hidden=false;}
+function stampOverlay(){const el=$('done');if(!legDone(DAY,LEG)){el.hidden=true;return;}const D=DATA.days[DAY],L=D.legs[LEG];
+  el.innerHTML=`<b>妃</b><span>${dLabel(D.date).replace(/（.）/,'')} ${L.district}<br>完成 ${L.km.toFixed(1)} 公里</span>`;el.hidden=false;}
 new ResizeObserver(()=>{resize();fit();}).observe(box);
 resize();
 useDay(pickDay());
@@ -502,6 +509,8 @@ async function pollLive(){
   const gp=(d.GPS||[]).map(q=>[+q.lng,+q.lat]).reverse();const cur=gp[gp.length-1];
   const fresh=iso===todayIso()&&iso===APP.date&&!/停止/.test(d.gpsType||'')&&cur;
   const age=fresh?nm-gm:1e9;
+  // 騎完＝GPS 真的到了最後一段的終點（250 公尺內、而且是那段出發 30 分鐘後）；GPS 中途停掉不算
+  finCheck(iso,gm,cur,fresh&&age<10);
   if(!fresh||age>30){
     if(today&&nm<first)return planMode(countdown());
     if(today&&nm>lastEnd+20)return planMode('今天的行程結束了・明天見！');
@@ -516,7 +525,6 @@ async function pollLive(){
   const where=(d.addr||'').replace(/^臺南市..區/,'').replace(/\d.*$/,'');
   if(!best||best.d>400){LIVE.mode='off';LIVE.delay=null;setBar(`即時 ${t.slice(11,16)}・${where}（不在預定路線上）`);draw();return;}
   const was=LIVE.mode;LIVE.mode='live';LIVE.k=best.k;LIVE.i=best.i;LIVE.delay=gm-APP.legs[best.k].T[best.i];
-  if(best.k===APP.legs.length-1&&best.i>=APP.legs[best.k].geom.length*0.97&&LIVE.finished!==APP.date){LIVE.finished=APP.date;stampOverlay();party('今天騎完了！','鐵馬妃起來・人民當靠3');}
   if(LIVE.k!==LEG&&Date.now()-userAt>20000)selectLeg(LIVE.k);
   if(LIVE.k===LEG&&Date.now()-userAt>20000){
     playing=false;$('play').textContent='▶';setProg(best.i/(leg().geom.length-1));
@@ -616,7 +624,7 @@ function showPage(p){[...$('pages').children].forEach(b=>b.setAttribute('aria-se
   ['Today','Stamps','All'].forEach(x=>{$('pg'+x).hidden=x!==p;$('pg'+x).style.display=x!==p?'none':(x==='Today'?'flex':'');});
   if(p==='Stamps')renderStamps();if(p==='All')renderAll();if(p==='Today'){resize();fit();}}
 $('pages').onclick=e=>{const b=e.target.closest('button');if(b)showPage(b.dataset.p);};
-function distState(){const st={};DATA.days.forEach((D,k)=>D.dists.forEach(n=>{(st[n]=st[n]||{days:[],done:[]}).days.push(D.date);if(dayDone(k))st[n].done.push(D.date);}));return st;}
+function distState(){const st={};DATA.days.forEach((D,k)=>D.legs.forEach((L,j)=>{const n=L.district;(st[n]=st[n]||{days:[],done:[]}).days.push(D.date);if(legDone(k,j))st[n].done.push(D.date);}));return st;}
 function renderStamps(){
   const st=distState(),F=DATA.districts;let a=[1e9,1e9,-1e9,-1e9];
   F.forEach(f=>f.geometry.coordinates.forEach(pl=>pl[0].forEach(p=>{a[0]=Math.min(a[0],p[0]);a[1]=Math.min(a[1],p[1]);a[2]=Math.max(a[2],p[0]);a[3]=Math.max(a[3],p[1]);})));
@@ -634,9 +642,10 @@ function renderStamps(){
   const ing=Object.entries(st).filter(([n,s])=>s.done.length&&s.done.length<s.days.length).map(([n])=>n);
   const nxt=DATA.days.find((D,k)=>!dayDone(k));
   $('stampNote').textContent=(ing.length?`進行中：${ing.join('、')}。`:'')+(nxt?`下一站：${dLabel(nxt.date)} ${nxt.title}。`:'');}
+function renderIfOpen(){if(!$('pgStamps').hidden)renderStamps();if(!$('pgAll').hidden)renderAll();}
 function renderAll(){const t=isoOf(new Date()),pk=pickDay();
   $('dlist').innerHTML=DATA.days.map((D,k)=>{const done=dayDone(k),cls=done?'done':k===pk?'now':'';const km=D.legs.reduce((a,L)=>a+L.km,0);
-    return `<li><button class="dcard ${cls}" data-k="${k}"><span class="chip">${done?'已完成':D.date===t?'今天':k===pk?'下一場':'預定'}</span><b>${dLabel(D.date)} ${D.title}</b><span>${D.legs.map(L=>`${L.district} ${L.gather?L.gather+' 集合・':''}${L.start} 出發・約 ${fmt(L.end)} 結束`).join('<br>')}</span><span>${km.toFixed(1)} 公里${D.legs.some(L=>(L.pending||[]).length)?'・有暫估路段':''}</span></button></li>`;}).join('');}
+    return `<li><button class="dcard ${cls}" data-k="${k}"><span class="chip">${done?'已完成':D.date===t?'今天':k===pk?'下一場':'預定'}</span><b>${dLabel(D.date)} ${D.title}</b><span>${D.legs.map((L,j)=>`${legDone(k,j)?'✅ ':''}${L.district} ${L.gather?L.gather+' 集合・':''}${L.start} 出發・約 ${fmt(L.end)} 結束`).join('<br>')}</span><span>${km.toFixed(1)} 公里${D.legs.some(L=>(L.pending||[]).length)?'・有暫估路段':''}</span></button></li>`;}).join('');}
 $('dlist').onclick=e=>{const b=e.target.closest('button');if(!b)return;userDay=+b.dataset.k!==pickDay();useDay(+b.dataset.k);showPage('Today');};
 // 每分鐘檢查：到 20:00、或剛騎完，就換到下一個行程日（使用者自己點了別天就不換）
 setInterval(()=>{stampOverlay();if(!userDay&&pickDay()!==DAY)useDay(pickDay());else dayBar();},60000);
