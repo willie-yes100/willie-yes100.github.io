@@ -285,7 +285,7 @@ function fAtTime(t){const T=leg().T;let lo=0,hi=T.length-1;if(t<=T[0])return 0;i
 let tNow=0;
 
 function fit(){const G=leg().geom;let a=[1e9,1e9,-1e9,-1e9];G.forEach(p=>{const q=P(p);a[0]=Math.min(a[0],q[0]);a[1]=Math.min(a[1],q[1]);a[2]=Math.max(a[2],q[0]);a[3]=Math.max(a[3],q[1]);});
-  const padTop=46,padBot=100;cam={cx:(a[0]+a[2])/2,cy:(a[1]+a[3])/2+((padBot-padTop)/2)/1e9,s:Math.min((W-40)/(a[2]-a[0]),(H-padTop-padBot-20)/(a[3]-a[1]))};
+  const padTop=46,padBot=100;cam={cx:(a[0]+a[2])/2,cy:(a[1]+a[3])/2+((padBot-padTop)/2)/1e9,s:Math.min((W-150)/(a[2]-a[0]),(H-padTop-padBot-20)/(a[3]-a[1]))};
   cam.cy+= (padBot-padTop)/2/cam.s; FIT_S=cam.s; draw();}
 function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=box.clientWidth;H=box.clientHeight;cv.width=W*DPR;cv.height=H*DPR;g.setTransform(DPR,0,0,DPR,0,0);}
 
@@ -312,7 +312,6 @@ function draw(){
   // 本段路線：全段淡、走過的實線
   line(G);g.strokeStyle=C.gsoft;g.lineWidth=7;g.stroke();
   if(hl){g.save();g.strokeStyle=C.pink;g.lineWidth=10;g.globalAlpha=.6;hl.forEach(r=>{line(G.slice(r[0],Math.max(r[1],r[0]+1)+1));g.stroke();});g.restore();}
-  (L.pending||[]).forEach(([a,b])=>{g.save();line(G.slice(a,b+1));g.strokeStyle=C.paper;g.lineWidth=7;g.stroke();g.strokeStyle=C.green;g.lineWidth=4.5;g.setLineDash([9,7]);g.stroke();g.restore();});
   const n=Math.floor(prog*(G.length-1));
   const head=posAt(prog);
   line([...G.slice(0,n+1),head]);g.strokeStyle=C.green;g.lineWidth=5;g.stroke();
@@ -322,15 +321,15 @@ function draw(){
   g.fillStyle=C.paper;for(let i=40;i<G.length-1;i+=60){const [x1,y1]=S(G[i]),[x2,y2]=S(G[i+1]);const a=Math.atan2(y2-y1,x2-x1);g.save();g.translate(x1,y1);g.rotate(a);g.beginPath();g.moveTo(3.5,0);g.lineTo(-2.5,-2.6);g.lineTo(-2.5,2.6);g.closePath();g.fill();g.restore();}
   // 停靠的廟
   L.stops.forEach(s=>{const [x,y]=S(s.pos);g.beginPath();g.arc(x,y,8,0,7);g.fillStyle=C.pink;g.fill();g.lineWidth=3;g.strokeStyle=C.paper;g.stroke();
-    g.font=`900 12px ${css('--display')}`;g.textAlign='left';g.lineWidth=4;g.strokeStyle=C.paper;g.strokeText(s.name,x+12,y+5);g.fillStyle=C.ink;g.fillText(s.name,x+12,y+5);
-    g.font=`600 10.5px ${css('--mono')}`;g.strokeText(fmt(s.t),x+12,y+19);g.fillStyle=C.pink;g.fillText(fmt(s.t),x+12,y+19);});
+    g.font=`900 12px ${css('--display')}`;const fl=x+12+g.measureText(s.name).width>W-8,tx=fl?x-12:x+12;g.textAlign=fl?'right':'left';g.lineWidth=4;g.strokeStyle=C.paper;g.strokeText(s.name,tx,y+5);g.fillStyle=C.ink;g.fillText(s.name,tx,y+5);
+    g.font=`600 10.5px ${css('--mono')}`;g.strokeText(fmt(s.t),tx,y+19);g.fillStyle=C.pink;g.fillText(fmt(s.t),tx,y+19);g.textAlign='left';});
   // 我家釘
   if(pin){const [x,y]=S(pin.p);g.beginPath();g.arc(x,y,7,0,7);g.fillStyle=C.ink;g.fill();const [qx,qy]=S(pin.q);g.save();g.setLineDash([4,4]);g.strokeStyle=C.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(x,y);g.lineTo(qx,qy);g.stroke();g.restore();}
   // 車隊
   const [hx,hy]=S(head);const pul=(performance.now()/900)%1;
   g.beginPath();g.arc(hx,hy,8+16*pul,0,7);g.fillStyle=C.green;g.globalAlpha=.25*(1-pul);g.fill();g.globalAlpha=1;
   if(!(LIVE.mode==='live'&&LIVE.k===LEG&&Date.now()-userAt>20000))bikeIcon(hx,hy,C.green,LIVE.mode==='live'?.45:1);
-  if(cs&&LIVE.delay==null){g.font=`900 13px ${css('--display')}`;g.textAlign='left';g.lineWidth=5;g.strokeStyle=C.paper;g.strokeText(cs.name,hx+21,hy+5);g.fillStyle=C.green;g.fillText(cs.name,hx+21,hy+5);}
+  if(cs&&LIVE.delay==null){g.font=`900 13px ${css('--display')}`;const fl=hx+21+g.measureText(cs.name).width>W-8,tx=fl?hx-21:hx+21,ty=fl?hy-22:hy+5;g.textAlign=fl?'right':'left';g.lineWidth=5;g.strokeStyle=C.paper;g.strokeText(cs.name,tx,ty);g.fillStyle=C.green;g.fillText(cs.name,tx,ty);g.textAlign='left';}
   // 實際軌跡（即時定位）
   if(LIVE.pts.length){line(LIVE.pts);g.strokeStyle=C.ink;g.lineWidth=3;g.setLineDash([2,5]);g.stroke();g.setLineDash([]);
     const [lx,ly]=S(LIVE.pts[LIVE.pts.length-1]);const pl=(performance.now()/700)%1;
@@ -398,7 +397,7 @@ function ask(name){
   if(pendNote(runs[0][0]))$('ans').insertAdjacentHTML('beforeend',pendNote(runs[0][0]));
   zoomTo(G.slice(runs[0][0],runs[0][1]+1));setProg(runs[0][0]/(G.length-1));}
 function show(h){const a=$('ans');a.innerHTML=h;a.hidden=false;}
-function pendNote(i){const p=(leg().pending||[]).find(([a,b])=>i>=a-3&&i<=b+3);return p?`<div class="hint" style="color:var(--green);font-weight:700">這附近是暫估路段：${p[2]}團隊確認後會更新。</div>`:'';}
+function pendNote(i){return '';}
 function zoomTo(pts){let a=[1e9,1e9,-1e9,-1e9];pts.forEach(p=>{const q=P(p);a[0]=Math.min(a[0],q[0]);a[1]=Math.min(a[1],q[1]);a[2]=Math.max(a[2],q[0]);a[3]=Math.max(a[3],q[1]);});
   cam.cx=(a[0]+a[2])/2;cam.cy=(a[1]+a[3])/2;cam.s=Math.max(FIT_S*2.5,Math.min(FIT_S*3.5,(W-80)/Math.max(1e-6,a[2]-a[0]),(H-200)/Math.max(1e-6,a[3]-a[1])));draw();}
 function askPoint(p){const L=leg(),G=L.geom;let bi=0,bd=1e12;G.forEach((q,i)=>{const d=dist(p,q);if(d<bd){bd=d;bi=i;}});
