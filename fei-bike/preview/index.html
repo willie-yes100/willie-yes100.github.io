@@ -135,6 +135,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
 .pages{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;max-width:520px}
 .pages button{flex:1;border:0;background:transparent;color:var(--green);border-radius:9px;padding:7px 4px;font:900 14px var(--body);cursor:pointer}
 .pages button[aria-selected="true"]{background:var(--green);color:#fff}
+.pages a.play{flex:1;text-align:center;text-decoration:none;border-radius:9px;padding:7px 4px;font:900 14px var(--body);background:var(--pink);color:#fff}
 .daybar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13.5px;color:var(--muted)}
 .daybar b{color:var(--ink)}
 .daybar button{border:2px solid var(--pink);background:var(--panel);color:var(--pink);border-radius:9px;padding:3px 10px;font:900 13px var(--body);cursor:pointer}
@@ -194,7 +195,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
       <h1 id="h1">妃妃鐵馬 <em>今天騎哪裡</em></h1>
     </div></div>
   </header>
-  <nav class="pages" id="pages" role="tablist"><button role="tab" data-p="Today" aria-selected="true">今日行程</button><button role="tab" data-p="Stamps" aria-selected="false">37 區集章</button><button role="tab" data-p="All" aria-selected="false">全部日程</button></nav>
+  <nav class="pages" id="pages" role="tablist"><button role="tab" data-p="Today" aria-selected="true">今日行程</button><button role="tab" data-p="Stamps" aria-selected="false">37 區集章</button><button role="tab" data-p="All" aria-selected="false">全部日程</button><a class="play" href="https://willie-yes100.github.io/fei-bike/game/">應援遊戲</a></nav>
   <section id="pgToday" style="display:flex;flex-direction:column;gap:10px">
   <div class="daybar" id="daybar"></div>
   <div class="tabs" id="tabs" role="tablist"></div>
