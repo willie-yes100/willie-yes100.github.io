@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="陳亭妃「鐵馬妃起來」今天的路線：看車隊即時位置、現在騎在哪條路、幾點經過你家。支持者自製，非官方。">
+<meta name="description" content="陳亭妃「鐵馬妃起來」今天的路線：看車隊即時位置、現在騎在哪條路、幾點經過你家。">
 <meta property="og:title" content="妃妃鐵馬 今天騎哪裡">
-<meta property="og:description" content="車隊即時位置＋預估路線，查路名看幾點經過你家。支持者自製，非官方。">
+<meta property="og:description" content="車隊即時位置＋預估路線，查路名看幾點經過你家。">
 <meta property="og:image" content="https://willie-yes100.github.io/fei-bike/og.jpg">
 <meta property="og:url" content="https://willie-yes100.github.io/fei-bike/">
 <meta property="og:type" content="website">
@@ -119,6 +119,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .btnrow .save{margin-top:0}
 .sharebtn{border:0;background:var(--pink);color:#fff;border-radius:10px;padding:8px 12px;font:900 14px var(--body);cursor:pointer}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;border:0;background:var(--pink);color:#fff;border-radius:999px;padding:12px 18px;font:900 15px var(--body);cursor:pointer;box-shadow:0 4px 14px rgba(216,30,91,.38)}
 .mapshare{position:absolute;left:10px;top:118px;border:0;background:var(--pink);color:#fff;border-radius:9px;padding:5px 11px;font:900 13.5px var(--body);cursor:pointer;box-shadow:0 2px 8px rgba(216,30,91,.3)}
 .sheet{position:fixed;inset:0;background:rgba(20,26,22,.62);z-index:50;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 [hidden]{display:none!important}
@@ -176,14 +177,15 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
 </head>
 <body>
 
+<button class="fab" id="shareNow">📤 分享妃妃騎到哪</button>
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetT">
   <div class="sheetbox">
     <h3 id="sheetT">分享卡</h3>
     <div class="fmt"><button id="fPost" aria-pressed="true">LINE／貼文</button><button id="fStory" aria-pressed="false">IG 限動</button></div>
     <img id="cardImg" alt="分享卡預覽">
     <button class="big" id="doShare">📤 分享出去</button>
-    <button class="ghost" id="doSave">存到手機</button>
-    <p class="hint">存不了的話：長按上面的圖片 →「儲存圖片」</p>
+    <button class="ghost" id="doSave" hidden>存到手機</button>
+    <p class="hint">要存圖：按分享出去 →「儲存影像」，或長按上面的圖片</p>
     <button class="ghost" id="closeSheet">關閉</button>
   </div>
 </div>
@@ -231,7 +233,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
       <section class="card">
         <details id="turnBox"><summary>完整路線（<span id="nTurns"></span> 個路口）</summary><ul class="turns" id="turns"></ul></details>
       </section>
-      <p class="foot" id="footSrc">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。支持者自製​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​，非官方。<br>© 2026 Yes100 AI Visual Lab</p>
+      <p class="foot" id="footSrc">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​<br>© 2026 Yes100 AI Visual Lab</p>
     </div>
   </div>
   </section>
@@ -558,7 +560,7 @@ async function pollLive(){
   const lag=Math.abs(dl)<3?'準時':`${dl>0?'晚':'早'} ${Math.abs(dl)} 分`;
   setBar(age>5?`訊號中斷 ${Math.round(age)} 分鐘・最後在${where}`:`即時 ${t.slice(11,16)}・${st||where}・<b>${lag}</b>`);
   if(LIVE.k===LEG&&Date.now()-userAt>20000){$('clk').textContent=t.slice(11,16);$('clkSub').textContent=`即時位置・${APP.legs[LIVE.k].district}`;}
-  $('shareLive').hidden=age>5;LIVE.where=st||where;LIVE.hm=t.slice(11,16);
+  $('shareLive').hidden=age>5;LIVE.age=age;LIVE.where=st||where;LIVE.hm=t.slice(11,16);
   homeChip();draw();
 }
 pollLive();setInterval(pollLive,30000);
@@ -596,13 +598,17 @@ function drawCard(o,fmt){
   g2.font='900 46px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=green;g2.fillText(`${L.district}・妃妃鐵馬`,425,y1+53);
   // 主文
   const y2=y1+(fmt==='story'?230:190);
-  if(o.kind==='live'){
+  if(o.kind==='est'||o.kind==='done'){
+    g2.font='800 50px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText(o.kind==='done'?'今天騎完了':'妃妃預估騎到',70,y2-52);
+    fitText(g2,o.name,940,128,900);g2.fillStyle=pink;g2.fillText(o.name,70,y2+72);
+    g2.font='600 54px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(o.sub,70,y2+148);
+  }else if(o.kind==='live'){
     g2.font='800 50px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText('妃妃現在騎到',70,y2-70);
     const sz=fitText(g2,o.name,940,128,900);g2.fillStyle=pink;g2.fillText(o.name,70,y2+60);
     g2.font='600 54px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(`${o.hm} 即時位置`,70,y2+140);
   }else{
     g2.font='600 150px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=pink;g2.fillText(fmt2(o.t),62,y2+40);
-    g2.font='900 54px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText('左右經過',540,y2+30);
+    g2.font='900 54px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText(o.kind==='plan'?'出發':'左右經過',540,y2+30);
     const sz=fitText(g2,o.name,940,108,900);g2.fillStyle=green;g2.fillText(o.name,70,y2+150);
   }
   // 小地圖
@@ -612,11 +618,12 @@ function drawCard(o,fmt){
   if(BIKE.complete&&BIKE.naturalWidth){const qh=fmt==='story'?470:400,qw=qh*BIKE.naturalWidth/BIKE.naturalHeight;g2.drawImage(BIKE,W-qw-40,my+mh-qh+70,qw,qh);}
   // 呼籲
   const y3=my+mh+(fmt==='story'?120:90);
-  g2.font='900 58px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText(o.kind==='live'?'快來路邊幫妃妃加油！':'我在這裡等妃妃！一起來 🙌',70,y3);
+  const FOOT={live:['快來路邊幫妃妃加油！','即時位置與路線都在這裡 →'],est:['快來路邊幫妃妃加油！','預估位置，即時位置請看網站 →'],plan:['一起來路邊幫妃妃加油！','路線與預估時間都在這裡 →'],done:['謝謝大家路邊加油！明天見 🙌','全部行程與 37 區集章都在這裡 →']}[o.kind];
+  g2.font='900 58px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle=ink;g2.fillText(FOOT?FOOT[0]:'我在這裡等妃妃！一起來 🙌',70,y3);
   g2.font='700 34px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#6b6f63';
-  g2.fillText(o.kind==='live'?'即時位置與路線都在這裡 →':'⏰ 預估時間會有誤差，請提早 10 分鐘到路邊等待',70,y3+62);
-  g2.font='600 36px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(SITE_URL.replace('https://',''),70,y3+(o.kind==='live'?120:118));
-  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('支持者自製・非官方｜© Yes100 AI Visual Lab',70,H-40);
+  g2.fillText(FOOT?FOOT[1]:'⏰ 預估時間會有誤差，請提早 10 分鐘到路邊等待',70,y3+62);
+  g2.font='600 36px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(SITE_URL.replace('https://',''),70,y3+(FOOT?120:118));
+  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('© Yes100 AI Visual Lab',70,H-40);
   return c;
 }
 function fmt2(m){return fmt(m);}
@@ -628,15 +635,36 @@ $('closeSheet').onclick=()=>{$('sheet').hidden=true;};
 $('sheet').addEventListener('click',e=>{if(e.target.id==='sheet')$('sheet').hidden=true;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('sheet').hidden=true;});
 function cardBlob(){return new Promise(r=>CARD.canvas.toBlob(r,'image/jpeg',0.92));}
-const cardText=()=>CARD.kind==='live'?`妃妃現在騎到 ${CARD.name}！快來路邊加油 ${SITE_URL}`:`妃妃鐵馬 ${dateLabel()} 約 ${fmt(CARD.t)} 經過 ${CARD.name}，我在這裡等！一起來 ${SITE_URL}`;
+const cardText=()=>({live:`妃妃現在騎到 ${CARD.name}！快來路邊加油 ${SITE_URL}`,est:`妃妃預估騎到 ${CARD.name}！快來路邊加油 ${SITE_URL}`,plan:`妃妃鐵馬 ${dateLabel()} ${fmt(CARD.t)} 從 ${CARD.name} 出發，一起來路邊加油 ${SITE_URL}`,done:`妃妃鐵馬 ${dateLabel()} 騎完${CARD.name}，謝謝大家！${SITE_URL}`}[CARD.kind]||(CARD.kind==='live'?`妃妃現在騎到 ${CARD.name}！快來路邊加油 ${SITE_URL}`:`妃妃鐵馬 ${dateLabel()} 約 ${fmt(CARD.t)} 經過 ${CARD.name}，我在這裡等！一起來 ${SITE_URL}`));
 $('doShare').onclick=async()=>{
   const b=await cardBlob(),f=new File([b],'妃妃鐵馬.jpg',{type:'image/jpeg'});
   try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:cardText()});return;}
       if(navigator.share){await navigator.share({text:cardText(),url:SITE_URL});return;}}catch(e){if(e.name==='AbortError')return;}
   $('doSave').click();
 };
-$('doSave').onclick=async()=>{const b=await cardBlob(),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='妃妃鐵馬.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);};
+// 存到手機：iPhone／Android 用系統分享選單（裡面有「儲存影像」）；LINE、FB、IG 裡開的網頁不能下載，改成大圖長按存；電腦才用下載
+const UA=navigator.userAgent,INAPP=/Line\/|FBAN|FBAV|FB_IAB|Instagram|MicroMessenger/i.test(UA),MOBILE=/iP(hone|ad|od)|Android/i.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function saveView(src){const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;text-align:center;color:#fff;font:700 16px/1.5 var(--body)';
+  const i=new Image();i.src=src;i.alt='分享卡';i.style.cssText='max-width:100%;max-height:68vh;border-radius:12px;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto';
+  const t=document.createElement('p');t.style.margin='0';t.innerHTML='👆 <b>長按圖片</b> →「儲存影像」或「加入照片」'+(INAPP?'<br><span style="font-weight:500;font-size:13.5px;opacity:.85">長按沒反應：按右上角「⋯」→「用瀏覽器開啟」再存</span>':'');
+  const c=document.createElement('button');c.textContent='關閉';c.style.cssText='border:0;border-radius:10px;padding:10px 26px;font:900 15px var(--body);background:#fff;color:#1d2a22';c.onclick=()=>o.remove();
+  o.append(i,t,c);o.onclick=e=>{if(e.target===o)o.remove();};document.body.appendChild(o);}
+$('doSave').onclick=async()=>{const b=await cardBlob();
+  if(MOBILE&&!INAPP){const f=new File([b],'妃妃鐵馬.jpg',{type:'image/jpeg'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return;}}catch(e){if(e.name==='AbortError')return;}}
+  if(MOBILE||INAPP){saveView(CARD.canvas.toDataURL('image/jpeg',0.92));return;}
+  const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='妃妃鐵馬.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);};
 $('shareLive').onclick=()=>{if(LIVE.mode!=='live')return;openCard({kind:'live',leg:LIVE.k,i:LIVE.i,name:LIVE.where||APP.legs[LIVE.k].district,hm:LIVE.hm});};
+// 常駐分享鈕：騎乘中有即時位置＝即時卡；出發前＝出發卡；訊號中斷或沒有定位＝照時刻表的預估位置；騎完＝收工卡
+function segAt(L,i){let n=L.district;for(const x of L.segs)if(!x.temple&&x.i0<=i)n=x.name;return n;}
+$('shareNow').onclick=()=>{
+  if(LIVE.mode==='live'&&LIVE.age<=5)return openCard({kind:'live',leg:LIVE.k,i:LIVE.i,name:LIVE.where||APP.legs[LIVE.k].district,hm:LIVE.hm});
+  const Ls=APP.legs,L0=Ls[0],LZ=Ls[Ls.length-1],nm=nowMin(),td=todayIso();
+  const nx=APP.date>td?0:APP.date<td?-1:Ls.findIndex((L,k)=>nm<hm2m(L.start)&&(k===0||nm>Ls[k-1].end));   // 出發前，或上午騎完、下午還沒出發
+  if(nx>=0){const L=Ls[nx];return openCard({kind:'plan',leg:nx,i:0,name:L.stops[0]?.name||L.district,t:hm2m(L.start)});}
+  if(APP.date<td||dayDone(DAY)||(LIVE.mode!=='live'&&nm>LZ.end+20))return openCard({kind:'done',leg:Ls.length-1,i:LZ.geom.length-1,name:APP.title,sub:`${Ls.reduce((a,L)=>a+L.km,0).toFixed(1)} 公里・謝謝大家`});
+  const t=nm-(LIVE.mode==='live'?LIVE.delay||0:0);let b={k:0,i:0,d:1e9};Ls.forEach((L,k)=>L.T.forEach((x,i)=>{const d=Math.abs(x-t);if(d<b.d)b={k,i,d};}));
+  openCard({kind:'est',leg:b.k,i:b.i,name:segAt(Ls[b.k],b.i),sub:`${fmt(nm)} 預估位置`});
+};
 // ── 分頁 ──
 function showPage(p){[...$('pages').children].forEach(b=>b.setAttribute('aria-selected',b.dataset.p===p));
   ['Today','Stamps','All'].forEach(x=>{$('pg'+x).hidden=x!==p;$('pg'+x).style.display=x!==p?'none':(x==='Today'?'flex':'');});

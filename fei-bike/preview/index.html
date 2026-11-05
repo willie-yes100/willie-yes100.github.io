@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="陳亭妃「鐵馬妃起來」今天的路線：看車隊即時位置、現在騎在哪條路、幾點經過你家。支持者自製，非官方。">
+<meta name="description" content="陳亭妃「鐵馬妃起來」今天的路線：看車隊即時位置、現在騎在哪條路、幾點經過你家。">
 <meta property="og:title" content="妃妃鐵馬 今天騎哪裡">
-<meta property="og:description" content="車隊即時位置＋預估路線，查路名看幾點經過你家。支持者自製，非官方。">
+<meta property="og:description" content="車隊即時位置＋預估路線，查路名看幾點經過你家。">
 <meta property="og:image" content="https://willie-yes100.github.io/fei-bike/og.jpg">
 <meta property="og:url" content="https://willie-yes100.github.io/fei-bike/preview/">
 <meta name="robots" content="noindex">
@@ -183,8 +183,8 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
     <div class="fmt"><button id="fPost" aria-pressed="true">LINE／貼文</button><button id="fStory" aria-pressed="false">IG 限動</button></div>
     <img id="cardImg" alt="分享卡預覽">
     <button class="big" id="doShare">📤 分享出去</button>
-    <button class="ghost" id="doSave">存到手機</button>
-    <p class="hint">存不了的話：長按上面的圖片 →「儲存圖片」</p>
+    <button class="ghost" id="doSave" hidden>存到手機</button>
+    <p class="hint">要存圖：按分享出去 →「儲存影像」，或長按上面的圖片</p>
     <button class="ghost" id="closeSheet">關閉</button>
   </div>
 </div>
@@ -232,7 +232,7 @@ summary{cursor:pointer;font-weight:700;color:var(--green)}
       <section class="card">
         <details id="turnBox"><summary>完整路線（<span id="nTurns"></span> 個路口）</summary><ul class="turns" id="turns"></ul></details>
       </section>
-      <p class="foot" id="footSrc">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。支持者自製​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​，非官方。<br>© 2026 Yes100 AI Visual Lab</p>
+      <p class="foot" id="footSrc">路線取自陳亭妃團隊公布的「鐵馬妃起來」路線圖，逐條換算到 OpenStreetMap 街道上；少數路口可能差一個街口。地圖資料 © OpenStreetMap 貢獻者；即時 GPS 來源：<a href="https://gps.godroad.tw/bicycle.php?sid=E261101" target="_blank" rel="noopener">隨香地圖</a>。​‌​‌‌​​‌​‌‌​​‌​‌​‌‌‌​​‌‌​​‌‌​​​‌​​‌‌​​​​​​‌‌​​​​<br>© 2026 Yes100 AI Visual Lab</p>
     </div>
   </div>
   </section>
@@ -617,7 +617,7 @@ function drawCard(o,fmt){
   g2.font='700 34px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#6b6f63';
   g2.fillText(o.kind==='live'?'即時位置與路線都在這裡 →':'⏰ 預估時間會有誤差，請提早 10 分鐘到路邊等待',70,y3+62);
   g2.font='600 36px "IBM Plex Mono",ui-monospace,monospace';g2.fillStyle=green;g2.fillText(SITE_URL.replace('https://',''),70,y3+(o.kind==='live'?120:118));
-  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('支持者自製・非官方｜© Yes100 AI Visual Lab',70,H-40);
+  g2.font='600 26px "Noto Sans TC","PingFang TC",sans-serif';g2.fillStyle='#9a8f78';g2.fillText('© Yes100 AI Visual Lab',70,H-40);
   return c;
 }
 function fmt2(m){return fmt(m);}
